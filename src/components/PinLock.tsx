@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import pinLockLogo from '@/assets/pin-lock-logo.png';
 
 /* ─── ABA-style 6-digit PIN lock ──────────────────────────────────────────────
    Used at app launch (every fresh entry) and before the personal center.
@@ -76,12 +77,12 @@ const PinLock = ({
     >
       {/* Header */}
       <div className="flex flex-col items-center gap-3 pt-6">
-        <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-[26px] font-extrabold tracking-wide"
-          style={{ background: 'linear-gradient(135deg, #E8002D, #B30022)', boxShadow: '0 8px 24px rgba(232,0,45,.35)' }}
-        >
-          ABA
-        </div>
+        <img
+          src={pinLockLogo}
+          alt="PIN lock"
+          className="w-20 h-20 rounded-full object-cover"
+          style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.12)' }}
+        />
         <h1 className="text-white text-[20px] font-bold mt-2">{title}</h1>
         <p className="text-white/50 text-[13px]">{subtitle}</p>
       </div>
