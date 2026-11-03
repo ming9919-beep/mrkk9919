@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, CheckCircle2, Check, Cloud, ChevronDown, Lock, Delete, Share2, RotateCcw, FileDown, History, MessageCircle, Star } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Check, Cloud, ChevronDown, Delete, Share2, RotateCcw, FileDown, History, MessageCircle, Star } from 'lucide-react';
+import pinLockLogo from '@/assets/pin-lock-logo.png';
 import { useLocation } from 'wouter';
 import { getPendingTransfer, clearPendingTransfer } from '@/lib/transferState';
 import { parseKHQR, DEMO_KHQR, type KHQRData } from '@/lib/khqr';
@@ -150,13 +151,13 @@ const PinScreen = ({ amount, currency, onPin, onCancel, status, error, shake }: 
       </div>
 
       <div className="flex-1 flex flex-col items-center px-8">
-        {/* Lock icon in translucent circle + 4 dots */}
-        <div className="w-[96px] h-[96px] rounded-full bg-white/10 backdrop-blur-sm border border-white/15 flex flex-col items-center justify-center mb-5 mt-3">
-          <Lock className="w-7 h-7 text-white/90" strokeWidth={2} />
-          <div className="flex gap-1 mt-1.5">
-            {[0, 1, 2, 3].map(i => <span key={i} className="w-1 h-1 rounded-full bg-white/70" />)}
-          </div>
-        </div>
+        {/* Lock logo — custom uploaded image */}
+        <img
+          src={pinLockLogo}
+          alt="PIN lock"
+          className="w-[100px] h-[100px] rounded-full object-cover mb-5 mt-3"
+          style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.12)' }}
+        />
 
         <h2 className="text-white text-[17px] font-bold tracking-wide text-center leading-snug">
           បញ្ចូលលេខសម្ងាត់ ដើម្បីបើកចូល
