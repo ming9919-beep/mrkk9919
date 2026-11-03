@@ -12,7 +12,7 @@ import pinLockLogo from '@/assets/pin-lock-logo.png';
 
 type Step = 'amount' | 'pin' | 'processing' | 'success';
 type Currency = 'USD' | 'KHR';
-const MOCK_PAYMENT_PIN = '1234';
+const MOCK_PAYMENT_PIN = '888000';
 
 const DARK_TEAL: React.CSSProperties = {
   background: 'linear-gradient(165deg, #164654 0%, #0C2A33 55%, #071A21 100%)',
@@ -403,10 +403,10 @@ const PinScreen = ({ amount, currency, onPin, onCancel, error, shake }: {
   const handleKey = (k: string) => {
     if (error) return;
     if (k === '⌫') { setPin((p) => p.slice(0, -1)); return; }
-    if (pin.length >= 4) return;
+    if (pin.length >= 6) return;
     const next = pin + k;
     setPin(next);
-    if (next.length === 4) onPin(next);
+    if (next.length === 6) onPin(next);
   };
   const digitKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
   const digitBtn = (d: string) => (
@@ -446,7 +446,7 @@ const PinScreen = ({ amount, currency, onPin, onCancel, error, shake }: {
 
         {/* PIN dots — 4 large white circles */}
         <div className={`flex items-center gap-5 mt-8 ${shake ? 'animate-[pinShake_0.4s_ease-in-out]' : ''}`}>
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <span
               key={i}
               className={`w-[26px] h-[26px] rounded-full transition-all duration-150 ${

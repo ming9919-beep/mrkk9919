@@ -20,7 +20,7 @@ import {
 } from '@/lib/paywayClient';
 
 /* Mock payment PIN for the demo (real flow verifies server-side). */
-const MOCK_PAYMENT_PIN = '1234';
+const MOCK_PAYMENT_PIN = '888000';
 
 /* ── Demo payment mode ────────────────────────────────────────────────────────
    false  = settle transfers locally (full journey testable in the demo; the
@@ -132,10 +132,10 @@ const PinScreen = ({ amount, currency, onPin, onCancel, status, error, shake }: 
     if (status === 'error' || status === 'success') return;
     if (k === 'face') return; // Face ID placeholder — no-op
     if (k === '⌫') { setPin(p => p.slice(0, -1)); return; }
-    if (pin.length >= 4) return;
+    if (pin.length >= 6) return;
     const next = pin + k;
     setPin(next);
-    if (next.length === 4) onPin(next);
+    if (next.length === 6) onPin(next);
   };
   return (
     <motion.div
@@ -168,7 +168,7 @@ const PinScreen = ({ amount, currency, onPin, onCancel, status, error, shake }: 
 
         {/* PIN dots — 4 large white circles (empty = bright, filled = dimmed) */}
         <div className={`flex items-center gap-5 mt-8 ${shake ? 'animate-[shake_0.4s_ease-in-out]' : ''}`}>
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <span
               key={i}
               className={`w-[26px] h-[26px] rounded-full transition-all duration-150
