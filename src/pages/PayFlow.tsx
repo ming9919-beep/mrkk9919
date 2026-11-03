@@ -6,7 +6,7 @@ import { getPendingTransfer, clearPendingTransfer } from '@/lib/transferState';
 import { addTxn } from '@/lib/txnStore';
 import { deductBalance } from '@/lib/balanceStore';
 import { BANK_MAP } from '@/lib/khqr';
-import BankLogo, { hasRealLogo } from '@/components/BankLogo';
+import BankLogo from '@/components/BankLogo';
 import { getTtsLang, speakTransferSuccessSmart } from '@/lib/tts';
 import pinLockLogo from '@/assets/pin-lock-logo.png';
 
@@ -270,7 +270,6 @@ const SuccessScreen = ({
   const details: [string, string][] = [
     ['ថ្ងៃធ្វើប្រតិបត្តិការ:', dateStr],
     ['លេខកូដបាតាង:', ref1],
-    ['ធនាគារទទួល:', bankName],
     ['លេខកូដប្រតិបត្តិការ:', ref2],
   ];
 
@@ -289,9 +288,6 @@ const SuccessScreen = ({
       <div className="w-full max-w-[360px] mt-5 bg-white rounded-[22px] shadow-xl overflow-hidden">
         <div className="px-5 pt-5 pb-4">
           <div className="flex items-center gap-3">
-            {hasRealLogo(bankCode) && (
-              <BankLogo bankCode={bankCode} bankName={bankName} size="lg" />
-            )}
             <div>
               <p className="text-[24px] font-extrabold text-gray-900 leading-none">{amt}</p>
               <p className="text-[14px] font-semibold text-gray-600 mt-1">{payeeName}</p>
