@@ -8,9 +8,11 @@ import { deductBalance } from '@/lib/balanceStore';
 import { BANK_MAP } from '@/lib/khqr';
 import BankLogo, { hasRealLogo } from '@/components/BankLogo';
 import { getTtsLang, speakTransferSuccessSmart } from '@/lib/tts';
+import pinLockLogo from '@/assets/pin-lock-logo.png';
 
-type Step = 'amount' | 'processing' | 'success';
+type Step = 'amount' | 'pin' | 'processing' | 'success';
 type Currency = 'USD' | 'KHR';
+const MOCK_PAYMENT_PIN = '1234';
 
 const DARK_TEAL: React.CSSProperties = {
   background: 'linear-gradient(165deg, #164654 0%, #0C2A33 55%, #071A21 100%)',
@@ -383,6 +385,110 @@ const NoteModal = ({ value, onChange, onClose }: { value: string; onChange: (v: 
 );
 
 /* ─── Page root ───────────────────────────────────────────────────────────── */
+/* ─── Payment PIN verification screen (scan-to-pay flow) ──────────────────── */
+const PinScreen = ({ amount, currency, onPin, onCancel, error, shake }: {
+  amount: string; currency: Currency;
+  onPin: (pin: string) => void;
+  onCancel: () => void;
+  error: boolean;
+  shake: boolean;
+}) => {
+  const [pin, setPin] = useState('');
+  useEffect(() => {
+    if (error) {
+      const t = setTimeout(() => setPin(''), 600);
+      return () => clearTimeout(t);
+    }
+  }, [error]);
+  const handleKey = (k: string) => {
+    if (error) return;
+    if (k === '⌫') { setPin((p) => p.slice(0, -1)); return; }
+    if (pin.length >= 4) return;
+    const next = pin + k;
+    setPin(next);
+    if (next.length === 4) onPin(next);
+  };
+  const digitKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  const digitBtn = (d: string) => (
+    <button
+      key={d}
+      onClick={() => handleKey(d)}
+      aria-label={`digit ${d}`}
+      className="w-[72px] h-[72px] rounded-full border-2 border-white/85 flex items-center justify-center text-white text-[30px] font-semibold active:bg-white/20 active:scale-95 transition-all justify-self-center"
+    >
+      {d}
+    </button>
+  );
+  return (
+    <div className="min-h-[100dvh] flex flex-col text-white" style={DARK_TEAL}>
+      {/* Header — cancel */}
+      <div className="px-5 pt-12 pb-2 shrink-0">
+        <button onClick={onCancel} className="text-white/90 text-[15px] font-semibold active:opacity-60">
+          បោះបង់
+        </button>
+      </div>
+
+      <div className="flex-1 flex flex-col items-center px-8">
+        {/* Lock logo — custom uploaded image */}
+        <img
+          src={pinLockLogo}
+          alt="PIN lock"
+          className="w-[100px] h-[100px] rounded-full object-cover mb-5 mt-3"
+          style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.12)' }}
+        />
+
+        <h2 className="text-white text-[17px] font-bold tracking-wide text-center leading-snug">
+          បញ្ចូលលេខសម្ងាត់ ដើម្បីបើកចូល
+        </h2>
+        <p className="text-white/60 text-[13px] font-medium mt-1.5">
+          {currency === 'KHR' ? Number(amount || 0).toLocaleString() + ' ៛' : '$' + Number(amount || 0).toFixed(2)}
+        </p>
+
+        {/* PIN dots — 4 large white circles */}
+        <div className={`flex items-center gap-5 mt-8 ${shake ? 'animate-[pinShake_0.4s_ease-in-out]' : ''}`}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <span
+              key={i}
+              className={`w-[26px] h-[26px] rounded-full transition-all duration-150 ${
+                i < pin.length ? 'bg-white/35' : 'bg-white'
+              } ${error ? '!bg-[#FF6B6B]' : ''}`}
+            />
+          ))}
+        </div>
+        {error && (
+          <p className="text-[#FF6B6B] text-[13px] font-medium mt-3">
+            លេខសម្ងាត់មិនត្រឹមត្រូវ · Incorrect PIN
+          </p>
+        )}
+      </div>
+
+      {/* Keypad */}
+      <div className="pb-12 px-6">
+        <div className="grid grid-cols-3 gap-x-10 gap-y-4 max-w-[300px] mx-auto">
+          {digitKeys.map(digitBtn)}
+          <span />
+          {digitBtn('0')}
+          <button onClick={() => handleKey('⌫')} aria-label="delete digit" className="w-[72px] h-[72px] flex items-center justify-center justify-self-center">
+            <span className="bg-[#7DD3FC] rounded-2xl px-3.5 py-2.5 flex items-center justify-center">
+              <Delete className="w-6 h-6 text-[#0C4A6E]" strokeWidth={2.4} />
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes pinShake {
+          0%,100% { transform: translateX(0); }
+          20% { transform: translateX(-10px); }
+          40% { transform: translateX(10px); }
+          60% { transform: translateX(-6px); }
+          80% { transform: translateX(6px); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 export default function PayFlow() {
   const pending = getPendingTransfer();
   const pd = pending?.data as any;
@@ -402,6 +508,8 @@ export default function PayFlow() {
   const [fromIdx, setFromIdx] = useState(0);
   const [note, setNote] = useState('');
   const [showNote, setShowNote] = useState(false);
+  const [pinError, setPinError] = useState(false);
+  const [pinShake, setPinShake] = useState(false);
 
   useEffect(() => {
     if (step === 'processing') {
@@ -439,6 +547,18 @@ export default function PayFlow() {
     }
   }, [step]);
 
+  const handlePin = (fullPin: string) => {
+    if (fullPin === MOCK_PAYMENT_PIN) {
+      setPinError(false);
+      setPinShake(false);
+      setStep('processing');
+    } else {
+      setPinError(true);
+      setPinShake(true);
+      setTimeout(() => { setPinError(false); setPinShake(false); }, 1100);
+    }
+  };
+
   if (step === 'processing')
     return <ProcessingScreen payeeName={payeeName} bankName={bankName} bankShort={bankShort} bankColor={bankColor} bankCode={bankCode} />;
   if (step === 'success')
@@ -451,6 +571,18 @@ export default function PayFlow() {
         bankShort={bankShort}
         bankColor={bankColor} bankCode={bankCode}
         fromNumber={accounts[fromIdx % accounts.length].number}
+      />
+    );
+
+  if (step === 'pin')
+    return (
+      <PinScreen
+        amount={amountStr || '0'}
+        currency={currency}
+        onPin={handlePin}
+        onCancel={() => { setStep('amount'); setPinError(false); setPinShake(false); }}
+        error={pinError}
+        shake={pinShake}
       />
     );
 
@@ -469,7 +601,7 @@ export default function PayFlow() {
         fromAcctIdx={fromIdx}
         cycleFromAcct={() => setFromIdx((i) => i + 1)}
         onOpenNote={() => setShowNote(true)}
-        onPay={() => setStep('processing')}
+        onPay={() => setStep('pin')}
       />
       {showNote && <NoteModal value={note} onChange={setNote} onClose={() => setShowNote(false)} />}
     </>
