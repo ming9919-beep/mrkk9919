@@ -10,6 +10,7 @@ import { defaultAccount } from '../data/accounts';
 import { getBalance } from '../lib/balanceStore';
 import abaLoanBanner from '../assets/aba-loan-banner.jpg';
 import abaBalanceDots from '../assets/aba-balance-dots.png';
+import HomeThemePicker, { HOME_THEMES, type HomeThemeId } from '../components/HomeThemePicker';
 
 /* ─── Grey/white cartoon cat avatar (Tom style) ─────────────────────────────── */
 const TomCatAvatar = () => (
@@ -243,7 +244,7 @@ const EyeOffIconABA = () => (
 );
 
 /* ─── Red main-account card (គណនីគោល) ─────────────────────────────────────── */
-const AccountCard = ({ show, setShow, onReceiveClick, onSendClick }: { show: boolean; setShow: (v: boolean) => void; onReceiveClick: () => void; onSendClick: () => void }) => {
+const AccountCard = ({ show, setShow, onReceiveClick, onSendClick, color }: { show: boolean; setShow: (v: boolean) => void; onReceiveClick: () => void; onSendClick: () => void; color: string }) => {
   const [, setLocation] = useLocation();
   return (
     <motion.div
@@ -252,7 +253,7 @@ const AccountCard = ({ show, setShow, onReceiveClick, onSendClick }: { show: boo
       transition={{ duration: 0.35 }}
       className="relative"
     >
-      <div className="rounded-[22px] overflow-hidden relative bg-[#E8002D] shadow-[0_6px_20px_rgba(232,0,45,0.25)]">
+      <div className="rounded-[22px] overflow-hidden relative shadow-[0_6px_20px_rgba(0,0,0,0.14)]" style={{ backgroundColor: color }}>
         {/* Balance + eye row */}
         <div className="px-5 pt-5 pb-1 relative flex items-center gap-3">
           {show ? (
@@ -728,7 +729,7 @@ const SendOptionsSheet = ({ open, onClose }: { open: boolean; onClose: () => voi
 };
 
 /* ─── Discover Section (ការស្វែងរកថ្មីៗ) ───────────────────────────────────── */
-const DiscoverSection = () => {
+const DiscoverSection = ({ onOpenThemePicker }: { onOpenThemePicker: () => void }) => {
   const cards = [
     {
       title: 'កំណត់ផ្សេងៗ\nកាន់តែស្រួល',
@@ -860,7 +861,10 @@ const DiscoverSection = () => {
         ))}
       </div>
       <div className="flex justify-center pt-1">
-        <button className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-7 py-3 rounded-full text-[14px] font-bold shadow-lg transition-colors active:scale-95">
+        <button
+          onClick={onOpenThemePicker}
+          className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-7 py-3 rounded-full text-[14px] font-bold shadow-lg transition-colors active:scale-95"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
             <path d="M12 20h9" strokeLinecap="round" />
             <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" strokeLinecap="round" strokeLinejoin="round" />
@@ -877,37 +881,80 @@ export default function Home() {
   const [showBalance, setShowBalance] = useState(true);
   const [showReceiveSheet, setShowReceiveSheet] = useState(false);
   const [showSendSheet, setShowSendSheet] = useState(false);
+  const [showThemePicker, setShowThemePicker] = useState(false);
+  const [homeTheme, setHomeTheme] = useState<HomeThemeId>(() => {
+    try {
+      const saved = localStorage.getItem('aba.home-theme');
+      return HOME_THEMES.some((theme) => theme.id === saved) ? (saved as HomeThemeId) : 'classic';
+    } catch (error) {
+      console.warn('Could not load the saved home screen theme.', error);
+      return 'classic';
+    }
+  });
+  const theme = HOME_THEMES.find((item) => item.id === homeTheme) ?? HOME_THEMES[0];
 
   return (
     <div className="min-h-[100dvh] md:h-screen md:min-h-screen bg-gray-300 flex items-center justify-center md:p-4 font-sans select-none">
       <div className="w-full h-full md:max-w-[390px] md:h-[844px] bg-[#F3F2F7] md:rounded-[2.5rem] shadow-2xl relative overflow-hidden md:border-[8px] border-black flex flex-col">
 
-        <div className="relative flex-1 overflow-y-auto hide-scrollbar z-10 pb-28">
-          <TopHeader />
+        <div className="relative flex-1 overflow-y-auto hide-scrollbar z-10 pb-28" style={{ backgroundColor: theme.background }} data-home-theme={theme.id}>
+          {theme.id !== 'classic' && (
+            <svg
+              viewBox="0 0 390 270"
+              preserveAspectRatio="xMidYMin slice"
+              className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[270px] w-full opacity-[0.12]"
+              aria-hidden="true"
+            >
+              <g fill="#806D50">
+                <path d="M253 98 273 46l20 52h31l-9 13H231l-9-13zm-36 17h112v12H217zm-10 14h132v13H207zm17 13h98v54h-98zm-22 54h142v14H202zm-14 14h170v12H188z" />
+                <path d="M245 143h12v53h-12zm32 0h12v53h-12z" fill={theme.background} />
+                <path d="M60 66c17-17 33-17 49 0-17-7-32-7-49 0zm80 24c12-12 24-12 36 0-12-5-24-5-36 0z" />
+              </g>
+            </svg>
+          )}
+          <div className="relative z-10">
+            <TopHeader />
 
-          <div className="px-4 space-y-4 pb-6 pt-1">
-            <AccountCard
-              show={showBalance}
-              setShow={setShowBalance}
-              onReceiveClick={() => setShowReceiveSheet(true)}
-              onSendClick={() => setShowSendSheet(true)}
-            />
-            <FeatureGrid />
-            <ScrollPills />
+            <div className="px-4 space-y-4 pb-6 pt-1">
+              <AccountCard
+                show={showBalance}
+                setShow={setShowBalance}
+                onReceiveClick={() => setShowReceiveSheet(true)}
+                onSendClick={() => setShowSendSheet(true)}
+                color={theme.account}
+              />
+              <FeatureGrid />
+              <ScrollPills />
 
-            {/* News & Promotion */}
-            <div className="space-y-2.5">
-              <h3 className="text-[15px] font-extrabold text-gray-900">ដំណឹង & ប្រូម៉ូសិន</h3>
-              <NewsBanner />
+              {/* News & Promotion */}
+              <div className="space-y-2.5">
+                <h3 className="text-[15px] font-extrabold text-gray-900">ដំណឹង & ប្រូម៉ូសិន</h3>
+                <NewsBanner />
+              </div>
+
+              <MiniAppsSection />
+              <DiscoverSection onOpenThemePicker={() => setShowThemePicker(true)} />
             </div>
-
-            <MiniAppsSection />
-            <DiscoverSection />
           </div>
         </div>
 
         <ReceiveOptionsSheet open={showReceiveSheet} onClose={() => setShowReceiveSheet(false)} />
         <SendOptionsSheet open={showSendSheet} onClose={() => setShowSendSheet(false)} />
+        {showThemePicker && (
+          <HomeThemePicker
+            activeTheme={homeTheme}
+            onClose={() => setShowThemePicker(false)}
+            onApply={(nextTheme) => {
+              setHomeTheme(nextTheme);
+              try {
+                localStorage.setItem('aba.home-theme', nextTheme);
+              } catch (error) {
+                console.warn('Could not save the home screen theme.', error);
+              }
+              setShowThemePicker(false);
+            }}
+          />
+        )}
       </div>
     </div>
   );

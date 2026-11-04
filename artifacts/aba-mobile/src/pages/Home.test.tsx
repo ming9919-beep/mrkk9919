@@ -17,6 +17,7 @@ function renderWithMemoryLocation(ui: ReactNode) {
 describe('Home page → Cards entry', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.removeItem('aba.home-theme');
   });
 
   it('renders a Cards tile that navigates to /cards', async () => {
@@ -29,5 +30,28 @@ describe('Home page → Cards entry', () => {
     await user.click(cardsTile);
     expect(navigate).toHaveBeenCalledTimes(1);
     expect(navigate.mock.calls[0][0]).toBe('/cards');
+  });
+
+  it('opens the home theme picker from the edit home screen button', async () => {
+    const user = userEvent.setup();
+    renderWithMemoryLocation(<Home />);
+
+    await user.click(screen.getByRole('button', { name: 'កែអេក្រង់ដើម' }));
+
+    expect(screen.getByRole('dialog', { name: 'ស្បែកអេក្រង់' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'ស្បែក សួនបៃតង' })).toBeInTheDocument();
+  });
+
+  it('applies and saves a selected home theme', async () => {
+    const user = userEvent.setup();
+    const { container } = renderWithMemoryLocation(<Home />);
+
+    await user.click(screen.getByRole('button', { name: 'កែអេក្រង់ដើម' }));
+    await user.click(screen.getByRole('button', { name: 'ស្បែក សួនបៃតង' }));
+    await user.click(screen.getByRole('button', { name: 'ប្រើប្រាស់' }));
+
+    expect(container.querySelector('[data-home-theme="garden"]')).toBeInTheDocument();
+    expect(localStorage.getItem('aba.home-theme')).toBe('garden');
+    expect(screen.queryByRole('dialog', { name: 'ស្បែកអេក្រង់' })).not.toBeInTheDocument();
   });
 });
