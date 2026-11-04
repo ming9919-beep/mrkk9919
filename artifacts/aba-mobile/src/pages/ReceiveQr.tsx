@@ -127,7 +127,7 @@ export default function ReceiveQr() {
               className="absolute z-10 -bottom-[26px] right-0 w-0 h-0"
               style={{ borderTop: '27px solid #df171e', borderLeft: '27px solid transparent' }}
             />
-          </span>
+          </div>
 
           {/* Merchant + amount */}
           <div className="px-6 pt-[22px] pb-4">

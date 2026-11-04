@@ -54,4 +54,23 @@ describe('Home page → Cards entry', () => {
     expect(localStorage.getItem('aba.home-theme')).toBe('garden');
     expect(screen.queryByRole('dialog', { name: 'ស្បែកអេក្រង់' })).not.toBeInTheDocument();
   });
+
+  it('switches the full home screen to the Angkor wallpaper style', async () => {
+    const user = userEvent.setup();
+    const { container } = renderWithMemoryLocation(<Home />);
+
+    await user.click(screen.getByRole('button', { name: 'កែអេក្រង់ដើម' }));
+    await user.click(screen.getByRole('button', { name: '+ រូបភាព' }));
+
+    const angkorTheme = screen.getByRole('button', { name: 'ស្បែក ទេសភាពអង្គរ' });
+    expect(angkorTheme).toBeInTheDocument();
+    await user.click(angkorTheme);
+    await user.click(screen.getByRole('button', { name: 'ប្រើប្រាស់' }));
+
+    const home = container.querySelector('[data-home-theme="angkor"]');
+    expect(home).toBeInTheDocument();
+    expect(home).toHaveAttribute('data-home-wallpaper', 'angkor');
+    expect(home).toHaveStyle({ backgroundColor: 'rgb(132, 146, 138)' });
+    expect(localStorage.getItem('aba.home-theme')).toBe('angkor');
+  });
 });

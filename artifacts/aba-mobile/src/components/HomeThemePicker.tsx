@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Palette, X } from 'lucide-react';
+import angkorWallpaper from '../assets/angkor-home.svg?url';
 
 export const HOME_THEMES = [
   { id: 'classic', name: 'បែបដើម', background: '#F3F2F7', account: '#E8002D', category: 'popular' },
   { id: 'garden', name: 'សួនបៃតង', background: '#E3EBDD', account: '#78947D', category: 'nature' },
   { id: 'sunrise', name: 'អង្គរពេលល្ងាច', background: '#F1E2D6', account: '#AC735C', category: 'festival' },
   { id: 'sky', name: 'មេឃស្រស់', background: '#E1EDF3', account: '#60869C', category: 'nature' },
-  { id: 'angkor', name: 'ទេសភាពអង្គរ', background: '#E8E4D6', account: '#89785E', category: 'wallpaper' },
+  { id: 'angkor', name: 'ទេសភាពអង្គរ', background: '#84928A', account: '#F5F1E4', category: 'wallpaper' },
 ] as const;
 
 export type HomeThemeId = (typeof HOME_THEMES)[number]['id'];
@@ -23,16 +24,27 @@ function ThemePreview({ theme }: { theme: (typeof HOME_THEMES)[number] }) {
   return (
     <div
       className="relative aspect-[0.58] overflow-hidden rounded-[15px] p-2.5"
-      style={{ backgroundColor: theme.background }}
+      style={{
+        backgroundColor: theme.background,
+        ...(theme.id === 'angkor'
+          ? {
+              backgroundImage: `linear-gradient(rgba(49, 62, 53, .28), rgba(87, 67, 52, .35)), url(${angkorWallpaper})`,
+              backgroundPosition: 'center',
+              backgroundSize: 'cover',
+            }
+          : {}),
+      }}
     >
-      <div className="absolute inset-0 overflow-hidden opacity-20" aria-hidden="true">
-        <svg viewBox="0 0 120 180" className="absolute right-0 top-3 h-28 w-20">
-          <path d="M58 31 71 8l13 23 10 13H48zM45 46h50v8H45zM39 54h62v8H39zM48 62h44v42H48zM34 104h72v8H34zM28 112h84v8H28z" fill="#806D50" />
-          <path d="M58 68h8v36h-8zm18 0h8v36h-8z" fill={theme.background} />
-          <path d="M18 146h84" stroke="#806D50" strokeWidth="3" strokeLinecap="round" />
-          <path d="m22 146 12-14 12 14m28 0 10-12 12 12" fill="none" stroke="#806D50" strokeWidth="3" strokeLinecap="round" />
-        </svg>
-      </div>
+      {theme.id !== 'angkor' && (
+        <div className="absolute inset-0 overflow-hidden opacity-20" aria-hidden="true">
+          <svg viewBox="0 0 120 180" className="absolute right-0 top-3 h-28 w-20">
+            <path d="M58 31 71 8l13 23 10 13H48zM45 46h50v8H45zM39 54h62v8H39zM48 62h44v42H48zM34 104h72v8H34zM28 112h84v8H28z" fill="#806D50" />
+            <path d="M58 68h8v36h-8zm18 0h8v36h-8z" fill={theme.background} />
+            <path d="M18 146h84" stroke="#806D50" strokeWidth="3" strokeLinecap="round" />
+            <path d="m22 146 12-14 12 14m28 0 10-12 12 12" fill="none" stroke="#806D50" strokeWidth="3" strokeLinecap="round" />
+          </svg>
+        </div>
+      )}
       <div className="relative flex items-center justify-between">
         <span className="h-2 w-8 rounded-full bg-white/70" />
         <span className="flex gap-0.5">
@@ -42,12 +54,12 @@ function ThemePreview({ theme }: { theme: (typeof HOME_THEMES)[number] }) {
         </span>
       </div>
       <div className="relative mt-3 rounded-lg p-2 shadow-sm" style={{ backgroundColor: theme.account }}>
-        <div className="h-2 w-12 rounded-full bg-white/75" />
-        <div className="mt-1.5 h-1.5 w-7 rounded-full bg-white/45" />
+        <div className={`h-2 w-12 rounded-full ${theme.id === 'angkor' ? 'bg-[#806d50]/55' : 'bg-white/75'}`} />
+        <div className={`mt-1.5 h-1.5 w-7 rounded-full ${theme.id === 'angkor' ? 'bg-[#806d50]/30' : 'bg-white/45'}`} />
         <div className="mt-2 flex justify-between">
-          <span className="h-1 w-5 rounded-full bg-white/70" />
-          <span className="h-1 w-5 rounded-full bg-white/70" />
-          <span className="h-1 w-5 rounded-full bg-white/70" />
+          <span className={`h-1 w-5 rounded-full ${theme.id === 'angkor' ? 'bg-[#806d50]/45' : 'bg-white/70'}`} />
+          <span className={`h-1 w-5 rounded-full ${theme.id === 'angkor' ? 'bg-[#806d50]/45' : 'bg-white/70'}`} />
+          <span className={`h-1 w-5 rounded-full ${theme.id === 'angkor' ? 'bg-[#806d50]/45' : 'bg-white/70'}`} />
         </div>
       </div>
       <div className="relative mt-2 grid grid-cols-2 gap-1">
@@ -81,6 +93,7 @@ export default function HomeThemePicker({
   return (
     <AnimatePresence>
       <motion.button
+        key="theme-picker-backdrop"
         type="button"
         aria-label="បិទការជ្រើសរើសស្បែក"
         initial={{ opacity: 0 }}
@@ -90,6 +103,7 @@ export default function HomeThemePicker({
         className="absolute inset-0 z-40 bg-black/40"
       />
       <motion.section
+        key="theme-picker-sheet"
         role="dialog"
         aria-modal="true"
         aria-labelledby="home-theme-title"

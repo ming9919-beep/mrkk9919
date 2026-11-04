@@ -11,6 +11,7 @@ import { getBalance } from '../lib/balanceStore';
 import abaLoanBanner from '../assets/aba-loan-banner.jpg';
 import abaBalanceDots from '../assets/aba-balance-dots.png';
 import HomeThemePicker, { HOME_THEMES, type HomeThemeId } from '../components/HomeThemePicker';
+import angkorWallpaper from '../assets/angkor-home.svg?url';
 
 /* ─── Grey/white cartoon cat avatar (Tom style) ─────────────────────────────── */
 const TomCatAvatar = () => (
@@ -53,7 +54,7 @@ const getGreeting = () => {
 };
 
 /* ─── Top Header (light theme) ──────────────────────────────────────────────── */
-const TopHeader = () => {
+const TopHeader = ({ frosted = false }: { frosted?: boolean }) => {
   const [, setLocation] = useLocation();
   return (
     <div className="px-4 pt-12 pb-3 flex items-center justify-between">
@@ -66,27 +67,27 @@ const TopHeader = () => {
           <TomCatAvatar />
         </button>
         <div>
-          <p className="text-[13px] text-gray-500 font-bold leading-none mb-1">{getGreeting()}</p>
-          <p className="text-[20px] font-extrabold text-gray-900 leading-none tracking-tight">Yukheang</p>
+          <p className={`text-[13px] font-bold leading-none mb-1 ${frosted ? 'text-white/85 drop-shadow-sm' : 'text-gray-500'}`}>{getGreeting()}</p>
+          <p className={`text-[20px] font-extrabold leading-none tracking-tight ${frosted ? 'text-white drop-shadow-sm' : 'text-gray-900'}`}>Yukheang</p>
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className={`flex items-center gap-4 ${frosted ? 'text-white drop-shadow-sm' : 'text-gray-700'}`}>
         <button
           onClick={() => setLocation('/chat')}
-          className="text-gray-700 hover:opacity-70 transition-opacity"
+          className="hover:opacity-70 transition-opacity"
           aria-label="Messages"
         >
           <MessageCircle className="w-[24px] h-[24px]" strokeWidth={2} />
         </button>
         <button
           onClick={() => setLocation('/notifications')}
-          className="relative text-gray-700 hover:opacity-70 transition-opacity"
+          className="relative hover:opacity-70 transition-opacity"
           aria-label="Notifications"
         >
           <Bell className="w-[24px] h-[24px]" strokeWidth={2} />
-          <span className="absolute -top-0.5 -right-0.5 w-[9px] h-[9px] bg-[#E8002D] rounded-full border-2 border-[#F3F2F7]" />
+          <span className={`absolute -top-0.5 -right-0.5 w-[9px] h-[9px] bg-[#E8002D] rounded-full border-2 ${frosted ? 'border-[#75877D]' : 'border-[#F3F2F7]'}`} />
         </button>
-        <button className="text-gray-700 hover:opacity-70 transition-opacity" aria-label="Cards">
+        <button className="hover:opacity-70 transition-opacity" aria-label="Cards">
           <CreditCard className="w-[24px] h-[24px]" strokeWidth={2} />
         </button>
         <button
@@ -102,7 +103,7 @@ const TopHeader = () => {
 };
 
 /* ─── Dotted Action Icon (from ABA official design) ─────────────────────────── */
-const DottedActionIcon = ({ kind }: { kind: 'receive' | 'send' | 'chart' }) => {
+const DottedActionIcon = ({ kind, color = 'white' }: { kind: 'receive' | 'send' | 'chart'; color?: string }) => {
   const dots = [];
   for (let row = 0; row < 11; row += 1) {
     for (let col = 0; col < 11; col += 1) {
@@ -115,15 +116,15 @@ const DottedActionIcon = ({ kind }: { kind: 'receive' | 'send' | 'chart' }) => {
   }
   return (
     <svg className="w-[30px] h-[30px]" viewBox="0 0 36 36" aria-hidden="true">
-      <g fill="white">{dots}</g>
+      <g fill={color}>{dots}</g>
       {kind === 'receive' && (
-        <path d="M11 23.5 22.7 11l2.8 2.6-11.8 12.2H11zM12.4 25.8l1.2-3.1 2.2 2.1z" fill="white" />
+        <path d="M11 23.5 22.7 11l2.8 2.6-11.8 12.2H11zM12.4 25.8l1.2-3.1 2.2 2.1z" fill={color} />
       )}
       {kind === 'send' && (
-        <path d="m11 24 13.5-12.5m-6.4.4 6.6-.6-.7 6.5" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="m11 24 13.5-12.5m-6.4.4 6.6-.6-.7 6.5" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       )}
       {kind === 'chart' && (
-        <g fill="white">
+        <g fill={color}>
           <rect x="10.5" y="19" width="3" height="7" rx=".5" />
           <rect x="16.5" y="14" width="3" height="12" rx=".5" />
           <rect x="22.5" y="10" width="3" height="16" rx=".5" />
@@ -150,7 +151,7 @@ const amountGlyphs: Record<string, string[]> = {
   ',': ['00000', '00000', '00000', '00000', '00000', '00100', '01000'],
 };
 
-const DotMatrixAmount = ({ amount }: { amount: string }) => {
+const DotMatrixAmount = ({ amount, color = 'white' }: { amount: string; color?: string }) => {
   const dotSpacing = 4.2;
   const characterGap = 4;
   let cursor = 0;
@@ -181,7 +182,7 @@ const DotMatrixAmount = ({ amount }: { amount: string }) => {
       aria-label={amount}
       preserveAspectRatio="xMinYMid meet"
     >
-      <g fill="white">
+      <g fill={color}>
         {dots.map((dot, index) => (
           <circle key={index} cx={dot.x} cy={dot.y} r="1.6" />
         ))}
@@ -201,7 +202,7 @@ const logoRows = [
   '111001111001111001111',
 ];
 
-const WordmarkDots = () => {
+const WordmarkDots = ({ color = 'white' }: { color?: string }) => {
   const dotSpacing = 3.2;
   const dots: Array<{ x: number; y: number }> = [];
   logoRows.forEach((row, rowIndex) => {
@@ -218,7 +219,7 @@ const WordmarkDots = () => {
   const height = logoRows.length * dotSpacing;
   return (
     <svg className="h-[28px] w-auto" viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
-      <g fill="white">
+      <g fill={color}>
         {dots.map((dot, i) => (
           <circle key={i} cx={dot.x} cy={dot.y} r="1.3" />
         ))}
@@ -228,24 +229,25 @@ const WordmarkDots = () => {
 };
 
 /* ─── Eye Icons (ABA official style) ────────────────────────────────────────── */
-const EyeIconABA = () => (
+const EyeIconABA = ({ color = 'white' }: { color?: string }) => (
   <svg viewBox="0 0 28 24" className="w-[28px] h-[22px]" aria-hidden="true">
-    <path d="M2.2 12s4.2-7.4 11.8-7.4S25.8 12 25.8 12s-4.2 7.4-11.8 7.4S2.2 12 2.2 12Z" fill="none" stroke="white" strokeWidth="2.8" strokeLinejoin="round" />
-    <circle cx="14" cy="12" r="3.2" fill="none" stroke="white" strokeWidth="2.6" />
+    <path d="M2.2 12s4.2-7.4 11.8-7.4S25.8 12 25.8 12s-4.2 7.4-11.8 7.4S2.2 12 2.2 12Z" fill="none" stroke={color} strokeWidth="2.8" strokeLinejoin="round" />
+    <circle cx="14" cy="12" r="3.2" fill="none" stroke={color} strokeWidth="2.6" />
   </svg>
 );
 
-const EyeOffIconABA = () => (
+const EyeOffIconABA = ({ color = 'white' }: { color?: string }) => (
   <svg viewBox="0 0 28 24" className="w-[28px] h-[22px]" aria-hidden="true">
-    <path d="M2.2 12s4.2-7.4 11.8-7.4S25.8 12 25.8 12s-4.2 7.4-11.8 7.4S2.2 12 2.2 12Z" fill="none" stroke="white" strokeWidth="2.8" strokeLinejoin="round" />
-    <circle cx="14" cy="12" r="3.2" fill="none" stroke="white" strokeWidth="2.6" />
-    <path d="m4 2 20 20" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" />
+    <path d="M2.2 12s4.2-7.4 11.8-7.4S25.8 12 25.8 12s-4.2 7.4-11.8 7.4S2.2 12 2.2 12Z" fill="none" stroke={color} strokeWidth="2.8" strokeLinejoin="round" />
+    <circle cx="14" cy="12" r="3.2" fill="none" stroke={color} strokeWidth="2.6" />
+    <path d="m4 2 20 20" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" />
   </svg>
 );
 
 /* ─── Red main-account card (គណនីគោល) ─────────────────────────────────────── */
-const AccountCard = ({ show, setShow, onReceiveClick, onSendClick, color }: { show: boolean; setShow: (v: boolean) => void; onReceiveClick: () => void; onSendClick: () => void; color: string }) => {
+const AccountCard = ({ show, setShow, onReceiveClick, onSendClick, color, frosted = false }: { show: boolean; setShow: (v: boolean) => void; onReceiveClick: () => void; onSendClick: () => void; color: string; frosted?: boolean }) => {
   const [, setLocation] = useLocation();
+  const ink = frosted ? '#755647' : '#FFFFFF';
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}
@@ -253,31 +255,34 @@ const AccountCard = ({ show, setShow, onReceiveClick, onSendClick, color }: { sh
       transition={{ duration: 0.35 }}
       className="relative"
     >
-      <div className="rounded-[22px] overflow-hidden relative shadow-[0_6px_20px_rgba(0,0,0,0.14)]" style={{ backgroundColor: color }}>
+      <div
+        className={`rounded-[22px] overflow-hidden relative border shadow-[0_10px_28px_rgba(45,37,29,0.16)] ${frosted ? 'border-white/60 backdrop-blur-md' : 'border-transparent'}`}
+        style={{ backgroundColor: frosted ? 'rgba(250, 248, 236, 0.94)' : color }}
+      >
         {/* Balance + eye row */}
         <div className="px-5 pt-5 pb-1 relative flex items-center gap-3">
           {show ? (
-            <DotMatrixAmount amount={`$${getBalance(defaultAccount.id, defaultAccount.balance)}`} />
+            <DotMatrixAmount amount={`$${getBalance(defaultAccount.id, defaultAccount.balance)}`} color={ink} />
           ) : (
-            <WordmarkDots />
+            <WordmarkDots color={ink} />
           )}
           <button
             onClick={() => setShow(!show)}
-            className="w-[44px] h-[40px] rounded-[14px] bg-white/17 flex items-center justify-center hover:bg-white/25 transition-colors active:scale-95"
+            className={`w-[44px] h-[40px] rounded-[14px] flex items-center justify-center transition-colors active:scale-95 ${frosted ? 'bg-[#789287]/20 hover:bg-[#789287]/30' : 'bg-white/17 hover:bg-white/25'}`}
             aria-label={show ? 'លាក់ចំនួនទឹកប្រាក់' : 'បង្ហាញចំនួនទឹកប្រាក់'}
           >
-            {show ? <EyeOffIconABA /> : <EyeIconABA />}
+            {show ? <EyeOffIconABA color={ink} /> : <EyeIconABA color={ink} />}
           </button>
         </div>
 
         {/* Account label */}
         <div className="px-5 pb-3 relative flex items-center gap-2">
-          <span className="text-[11px] font-bold bg-white text-gray-900 px-2 py-0.5 rounded">គណនីគោល</span>
-          <span className="text-[14px] font-bold text-white">{defaultAccount.name}</span>
+          <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${frosted ? 'bg-[#8DAFA0]/35 text-[#654B3D]' : 'bg-white text-gray-900'}`}>គណនីគោល</span>
+          <span className="text-[14px] font-bold" style={{ color: ink }}>{defaultAccount.name}</span>
         </div>
 
         {/* Actions row */}
-        <div className="flex items-center relative border-t border-white/20">
+        <div className={`flex items-center relative border-t ${frosted ? 'border-[#856b55]/20' : 'border-white/20'}`}>
           {[
             { label: 'ទទួលលុយ', action: onReceiveClick, kind: 'receive' as const },
             { label: 'ផ្ញើលុយ', action: onSendClick, kind: 'send' as const },
@@ -288,10 +293,10 @@ const AccountCard = ({ show, setShow, onReceiveClick, onSendClick, color }: { sh
                 onClick={() => btn.action && btn.action()}
                 className="flex-1 py-3.5 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors active:scale-95"
               >
-                <DottedActionIcon kind={btn.kind} />
-                <span className="text-[12.5px] font-bold text-white">{btn.label}</span>
+                <DottedActionIcon kind={btn.kind} color={ink} />
+                <span className="text-[12.5px] font-bold" style={{ color: ink }}>{btn.label}</span>
               </button>
-              {i === 1 && <div className="w-[1px] h-6 bg-white/25" />}
+              {i === 1 && <div className={`w-[1px] h-6 ${frosted ? 'bg-[#856b55]/25' : 'bg-white/25'}`} />}
             </React.Fragment>
           ))}
         </div>
@@ -345,7 +350,7 @@ const IconTransfer = () => (
 );
 
 /* ─── 3×2 Feature Grid (light theme, line icons) ────────────────────────────── */
-const FeatureGrid = () => {
+const FeatureGrid = ({ frosted = false }: { frosted?: boolean }) => {
   const [, setLocation] = useLocation();
   const items = [
     { label: 'គណនី', icon: <IconFolder />, route: '/accounts' },
@@ -365,10 +370,12 @@ const FeatureGrid = () => {
           transition={{ delay: 0.05 + i * 0.03 }}
           whileTap={{ scale: 0.94 }}
           onClick={() => item.route && setLocation(item.route)}
-          className="bg-white rounded-[18px] py-4 px-2 flex flex-col items-center justify-center gap-2 shadow-[0_1px_6px_rgba(0,0,0,0.05)] active:bg-gray-50"
+          className={`rounded-[18px] py-4 px-2 flex flex-col items-center justify-center gap-2 shadow-[0_4px_14px_rgba(51,42,33,0.1)] active:bg-white/70 ${
+            frosted ? 'border border-white/65 bg-[#F9F6E9]/90 backdrop-blur-md' : 'bg-white active:bg-gray-50'
+          }`}
         >
           {item.icon}
-          <span className="text-[11px] font-bold text-gray-700 leading-tight text-center">{item.label}</span>
+          <span className={`text-[11px] font-bold leading-tight text-center ${frosted ? 'text-[#76594A]' : 'text-gray-700'}`}>{item.label}</span>
         </motion.button>
       ))}
     </div>
@@ -376,7 +383,7 @@ const FeatureGrid = () => {
 };
 
 /* ─── Horizontal scroll pills (មីនីអេប / អាជីវករ ABA / ការទូទាត់ស្វ័យ) ─────── */
-const ScrollPills = () => {
+const ScrollPills = ({ frosted = false }: { frosted?: boolean }) => {
   const [, setLocation] = useLocation();
   const pills = [
     { label: 'មីនីអេប', icon: <LayoutGrid className="w-5 h-5 text-gray-600" strokeWidth={1.8} />, route: null },
@@ -390,10 +397,12 @@ const ScrollPills = () => {
           key={p.label}
           whileTap={{ scale: 0.96 }}
           onClick={() => p.route && setLocation(p.route)}
-          className="shrink-0 flex items-center gap-2 bg-white rounded-full px-4 py-2.5 shadow-[0_1px_6px_rgba(0,0,0,0.05)]"
+          className={`shrink-0 flex items-center gap-2 rounded-full px-4 py-2.5 shadow-[0_4px_14px_rgba(51,42,33,0.1)] ${
+            frosted ? 'border border-white/55 bg-[#F9F6E9]/85 backdrop-blur-md [&_svg]:text-[#7B6251]' : 'bg-white'
+          }`}
         >
           {p.icon}
-          <span className="text-[12px] font-bold text-gray-700 whitespace-nowrap">{p.label}</span>
+          <span className={`text-[12px] font-bold whitespace-nowrap ${frosted ? 'text-[#76594A]' : 'text-gray-700'}`}>{p.label}</span>
         </motion.button>
       ))}
     </div>
@@ -524,12 +533,14 @@ const miniApps = [
   { name: 'ប៊ុកមីបាស', icon: <BusIcon /> },
 ];
 
-const MiniAppsSection = () => {
+const MiniAppsSection = ({ frosted = false }: { frosted?: boolean }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   return (
     <div className="space-y-2.5">
-      <h3 className="text-[15px] font-extrabold text-gray-900">មីនីអេប</h3>
-      <div className="relative bg-white rounded-2xl px-3 py-4 shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
+      <h3 className={`text-[15px] font-extrabold ${frosted ? 'text-white drop-shadow-[0_1px_3px_rgba(35,31,25,0.6)]' : 'text-gray-900'}`}>មីនីអេប</h3>
+      <div className={`relative rounded-2xl border px-3 py-4 shadow-[0_8px_24px_rgba(40,34,27,0.13)] ${
+        frosted ? 'border-white/30 bg-[#f7f0dd]/35 backdrop-blur-lg' : 'border-transparent bg-white shadow-[0_1px_6px_rgba(0,0,0,0.05)]'
+      }`}>
         <div ref={scrollRef} className="flex overflow-x-auto hide-scrollbar gap-5 px-2">
           {miniApps.map(app => (
             <div key={app.name} className="flex flex-col items-center gap-1.5 shrink-0">
@@ -539,7 +550,7 @@ const MiniAppsSection = () => {
               >
                 {app.icon}
               </motion.div>
-              <span className="text-[10px] font-bold text-gray-600 text-center leading-tight max-w-[64px]">
+              <span className={`text-[10px] font-bold text-center leading-tight max-w-[64px] ${frosted ? 'text-white drop-shadow-[0_1px_2px_rgba(35,31,25,0.7)]' : 'text-gray-600'}`}>
                 {app.name}
               </span>
             </div>
@@ -729,7 +740,7 @@ const SendOptionsSheet = ({ open, onClose }: { open: boolean; onClose: () => voi
 };
 
 /* ─── Discover Section (ការស្វែងរកថ្មីៗ) ───────────────────────────────────── */
-const DiscoverSection = ({ onOpenThemePicker }: { onOpenThemePicker: () => void }) => {
+const DiscoverSection = ({ onOpenThemePicker, frosted = false }: { onOpenThemePicker: () => void; frosted?: boolean }) => {
   const cards = [
     {
       title: 'កំណត់ផ្សេងៗ\nកាន់តែស្រួល',
@@ -840,7 +851,7 @@ const DiscoverSection = ({ onOpenThemePicker }: { onOpenThemePicker: () => void 
 
   return (
     <div className="space-y-3">
-      <h3 className="text-[18px] font-extrabold text-gray-900">ការស្វែងរកថ្មីៗ</h3>
+      <h3 className={`text-[18px] font-extrabold ${frosted ? 'text-white drop-shadow-[0_1px_3px_rgba(35,31,25,0.6)]' : 'text-gray-900'}`}>ការស្វែងរកថ្មីៗ</h3>
       <div className="flex overflow-x-auto hide-scrollbar gap-3 -mx-4 px-4 pb-2">
         {cards.map((card, i) => (
           <motion.div
@@ -863,7 +874,11 @@ const DiscoverSection = ({ onOpenThemePicker }: { onOpenThemePicker: () => void 
       <div className="flex justify-center pt-1">
         <button
           onClick={onOpenThemePicker}
-          className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-7 py-3 rounded-full text-[14px] font-bold shadow-lg transition-colors active:scale-95"
+          className={`flex items-center gap-2 px-7 py-3 rounded-full text-[14px] font-bold shadow-lg transition-all active:scale-95 ${
+            frosted
+              ? 'border border-white/70 bg-gradient-to-r from-[#c6e8d8]/95 to-[#a5d8c8]/95 text-[#55796c] shadow-[0_8px_22px_rgba(38,63,52,0.26)] hover:from-[#d3efdf] hover:to-[#b8e3d3]'
+              : 'bg-gray-800 text-white hover:bg-gray-700'
+          }`}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
             <path d="M12 20h9" strokeLinecap="round" />
@@ -892,13 +907,32 @@ export default function Home() {
     }
   });
   const theme = HOME_THEMES.find((item) => item.id === homeTheme) ?? HOME_THEMES[0];
+  const frosted = theme.id === 'angkor';
 
   return (
-    <div className="min-h-[100dvh] md:h-screen md:min-h-screen bg-gray-300 flex items-center justify-center md:p-4 font-sans select-none">
+    <div
+      className="min-h-[100dvh] md:h-screen md:min-h-screen bg-gray-300 flex items-center justify-center md:p-4 font-sans select-none"
+      style={frosted ? { backgroundImage: `url(${angkorWallpaper})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+    >
       <div className="w-full h-full md:max-w-[390px] md:h-[844px] bg-[#F3F2F7] md:rounded-[2.5rem] shadow-2xl relative overflow-hidden md:border-[8px] border-black flex flex-col">
 
-        <div className="relative flex-1 overflow-y-auto hide-scrollbar z-10 pb-28" style={{ backgroundColor: theme.background }} data-home-theme={theme.id}>
-          {theme.id !== 'classic' && (
+        <div
+          className="relative flex-1 overflow-y-auto hide-scrollbar z-10 pb-28"
+          style={{
+            backgroundColor: theme.background,
+            ...(frosted
+              ? {
+                  backgroundImage: `linear-gradient(rgba(42, 65, 58, 0.3), rgba(75, 58, 45, 0.38)), url(${angkorWallpaper})`,
+                  backgroundPosition: 'center top',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                }
+              : {}),
+          }}
+          data-home-theme={theme.id}
+          data-home-wallpaper={frosted ? 'angkor' : undefined}
+        >
+          {!frosted && theme.id !== 'classic' && (
             <svg
               viewBox="0 0 390 270"
               preserveAspectRatio="xMidYMin slice"
@@ -913,7 +947,7 @@ export default function Home() {
             </svg>
           )}
           <div className="relative z-10">
-            <TopHeader />
+            <TopHeader frosted={frosted} />
 
             <div className="px-4 space-y-4 pb-6 pt-1">
               <AccountCard
@@ -922,18 +956,19 @@ export default function Home() {
                 onReceiveClick={() => setShowReceiveSheet(true)}
                 onSendClick={() => setShowSendSheet(true)}
                 color={theme.account}
+                frosted={frosted}
               />
-              <FeatureGrid />
-              <ScrollPills />
+              <FeatureGrid frosted={frosted} />
+              <ScrollPills frosted={frosted} />
 
               {/* News & Promotion */}
               <div className="space-y-2.5">
-                <h3 className="text-[15px] font-extrabold text-gray-900">ដំណឹង & ប្រូម៉ូសិន</h3>
+                <h3 className={`text-[15px] font-extrabold ${frosted ? 'text-white drop-shadow-[0_1px_3px_rgba(35,31,25,0.6)]' : 'text-gray-900'}`}>ដំណឹង & ប្រូម៉ូសិន</h3>
                 <NewsBanner />
               </div>
 
-              <MiniAppsSection />
-              <DiscoverSection onOpenThemePicker={() => setShowThemePicker(true)} />
+              <MiniAppsSection frosted={frosted} />
+              <DiscoverSection onOpenThemePicker={() => setShowThemePicker(true)} frosted={frosted} />
             </div>
           </div>
         </div>
