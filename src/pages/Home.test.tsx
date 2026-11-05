@@ -17,6 +17,7 @@ function renderWithMemoryLocation(ui: ReactNode) {
 describe('Home page → Cards entry', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
   });
 
   it('renders a Cards tile that navigates to /cards', async () => {
@@ -29,5 +30,19 @@ describe('Home page → Cards entry', () => {
     await user.click(cardsTile);
     expect(navigate).toHaveBeenCalledTimes(1);
     expect(navigate.mock.calls[0][0]).toBe('/cards');
+  });
+
+  it('opens the home theme picker and saves the selected theme', async () => {
+    const user = userEvent.setup();
+    renderWithMemoryLocation(<Home />);
+
+    await user.click(screen.getByRole('button', { name: /កែអេក្រង់ដើម/ }));
+    expect(screen.getByRole('dialog', { name: 'ស្បែកអេក្រង់' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'ស្បែក មេឃស្រស់' }));
+    await user.click(screen.getByRole('button', { name: 'ប្រើប្រាស់' }));
+
+    expect(window.localStorage.getItem('aba.home.theme')).toBe('sky');
+    expect(screen.queryByRole('dialog', { name: 'ស្បែកអេក្រង់' })).not.toBeInTheDocument();
   });
 });

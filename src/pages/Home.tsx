@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'wouter';
 import {
-  Bell, Eye, EyeOff, CreditCard, QrCode, Star, MessageCircle,
+  Bell, CreditCard, QrCode, MessageCircle,
   ArrowRightLeft, Wallet, LayoutGrid, Store, CalendarClock,
-  ChevronLeft, ChevronRight, Home as HomeIcon, Clock, Link2
+  Home as HomeIcon, Clock, Link2
 } from 'lucide-react';
 import { defaultAccount } from '../data/accounts';
 import { getBalance } from '../lib/balanceStore';
+import HomeThemePicker, { HOME_THEMES, type HomeThemeId } from '../components/HomeThemePicker';
+import angkorWallpaper from '../assets/angkor-home.svg?url';
 import promo0 from '@/assets/promo_0.webp';
 import promo1 from '@/assets/promo_1.webp';
 import promo2 from '@/assets/promo_2.webp';
@@ -55,7 +57,7 @@ const getGreeting = () => {
 };
 
 /* ─── Top Header (light theme) ──────────────────────────────────────────────── */
-const TopHeader = () => {
+const TopHeader = ({ frosted = false }: { frosted?: boolean }) => {
   const [, setLocation] = useLocation();
   return (
     <div className="px-4 pt-12 pb-3 flex items-center justify-between">
@@ -68,32 +70,32 @@ const TopHeader = () => {
           <TomCatAvatar />
         </button>
         <div>
-          <p className="text-[13px] text-gray-500 font-bold leading-none mb-1">{getGreeting()}</p>
-          <p className="text-[20px] font-extrabold text-gray-900 leading-none tracking-tight">Yukheang</p>
+          <p className={`text-[13px] font-bold leading-none mb-1 ${frosted ? 'text-white drop-shadow' : 'text-gray-500'}`}>{getGreeting()}</p>
+          <p className={`text-[20px] font-extrabold leading-none tracking-tight ${frosted ? 'text-white drop-shadow' : 'text-gray-900'}`}>Yukheang</p>
         </div>
       </div>
       <div className="flex items-center gap-4">
         <button
           onClick={() => setLocation('/chat')}
-          className="text-gray-700 hover:opacity-70 transition-opacity"
+          className={`${frosted ? 'text-white' : 'text-gray-700'} hover:opacity-70 transition-opacity`}
           aria-label="Messages"
         >
           <MessageCircle className="w-[24px] h-[24px]" strokeWidth={2} />
         </button>
         <button
           onClick={() => setLocation('/notifications')}
-          className="relative text-gray-700 hover:opacity-70 transition-opacity"
+          className={`relative ${frosted ? 'text-white' : 'text-gray-700'} hover:opacity-70 transition-opacity`}
           aria-label="Notifications"
         >
           <Bell className="w-[24px] h-[24px]" strokeWidth={2} />
-          <span className="absolute -top-0.5 -right-0.5 w-[9px] h-[9px] bg-[#E8002D] rounded-full border-2 border-[#F3F2F7]" />
+          <span className={`absolute -top-0.5 -right-0.5 w-[9px] h-[9px] bg-[#E8002D] rounded-full border-2 ${frosted ? 'border-[#84928A]' : 'border-[#F3F2F7]'}`} />
         </button>
-        <button className="text-gray-700 hover:opacity-70 transition-opacity" aria-label="Cards">
+        <button className={`${frosted ? 'text-white' : 'text-gray-700'} hover:opacity-70 transition-opacity`} aria-label="Cards">
           <CreditCard className="w-[24px] h-[24px]" strokeWidth={2} />
         </button>
         <button
           onClick={() => setLocation('/receive')}
-          className="w-[36px] h-[36px] rounded-[10px] bg-[#E8002D] flex items-center justify-center shadow-sm hover:scale-105 transition-transform"
+          className={`w-[36px] h-[36px] rounded-[10px] ${frosted ? 'bg-white/25 border border-white/40' : 'bg-[#E8002D]'} flex items-center justify-center shadow-sm hover:scale-105 transition-transform`}
           aria-label="ABA Pay QR"
         >
           <QrCode className="w-[20px] h-[20px] text-white" strokeWidth={2.2} />
@@ -143,7 +145,7 @@ const amountGlyphs: Record<string, string[]> = {
   ',': ['00000', '00000', '00000', '00000', '00000', '00100', '01000'],
 };
 
-const DotMatrixAmount = ({ amount }: { amount: string }) => {
+const DotMatrixAmount = ({ amount, color = 'white' }: { amount: string; color?: string }) => {
   const dotSpacing = 4.2;
   const characterGap = 4;
   let cursor = 0;
@@ -174,7 +176,7 @@ const DotMatrixAmount = ({ amount }: { amount: string }) => {
       aria-label={amount}
       preserveAspectRatio="xMinYMid meet"
     >
-      <g fill="white">
+      <g fill={color}>
         {dots.map((dot, index) => (
           <circle key={index} cx={dot.x} cy={dot.y} r="1.6" />
         ))}
@@ -187,7 +189,7 @@ const DotMatrixAmount = ({ amount }: { amount: string }) => {
    A wide block of white dots on the red card — looks like a dot-matrix display
    with the amount hidden (all segments lit "888888" style). Renders 6 hidden
    digits (5×5 dots each) with 1-column gaps, matching the reference screenshot. */
-const HiddenBalanceDots = () => {
+const HiddenBalanceDots = ({ color = 'white' }: { color?: string }) => {
   const dotSpacing = 4.4;
   const dots: Array<{ x: number; y: number }> = [];
   const DIGITS = 6;
@@ -210,7 +212,7 @@ const HiddenBalanceDots = () => {
   const height = ROWS * dotSpacing;
   return (
     <svg className="h-[26px] w-auto" viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
-      <g fill="white">
+      <g fill={color}>
         {dots.map((dot, i) => (
           <circle key={i} cx={dot.x} cy={dot.y} r="1.5" />
         ))}
@@ -220,24 +222,26 @@ const HiddenBalanceDots = () => {
 };
 
 /* ─── Eye Icons (ABA official style) ────────────────────────────────────────── */
-const EyeIconABA = () => (
+const EyeIconABA = ({ color = 'white' }: { color?: string }) => (
   <svg viewBox="0 0 28 24" className="w-[28px] h-[22px]" aria-hidden="true">
-    <path d="M2.2 12s4.2-7.4 11.8-7.4S25.8 12 25.8 12s-4.2 7.4-11.8 7.4S2.2 12 2.2 12Z" fill="none" stroke="white" strokeWidth="2.8" strokeLinejoin="round" />
-    <circle cx="14" cy="12" r="3.2" fill="none" stroke="white" strokeWidth="2.6" />
+    <path d="M2.2 12s4.2-7.4 11.8-7.4S25.8 12 25.8 12s-4.2 7.4-11.8 7.4S2.2 12 2.2 12Z" fill="none" stroke={color} strokeWidth="2.8" strokeLinejoin="round" />
+    <circle cx="14" cy="12" r="3.2" fill="none" stroke={color} strokeWidth="2.6" />
   </svg>
 );
 
-const EyeOffIconABA = () => (
+const EyeOffIconABA = ({ color = 'white' }: { color?: string }) => (
   <svg viewBox="0 0 28 24" className="w-[28px] h-[22px]" aria-hidden="true">
-    <path d="M2.2 12s4.2-7.4 11.8-7.4S25.8 12 25.8 12s-4.2 7.4-11.8 7.4S2.2 12 2.2 12Z" fill="none" stroke="white" strokeWidth="2.8" strokeLinejoin="round" />
-    <circle cx="14" cy="12" r="3.2" fill="none" stroke="white" strokeWidth="2.6" />
-    <path d="m4 2 20 20" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" />
+    <path d="M2.2 12s4.2-7.4 11.8-7.4S25.8 12 25.8 12s-4.2 7.4-11.8 7.4S2.2 12 2.2 12Z" fill="none" stroke={color} strokeWidth="2.8" strokeLinejoin="round" />
+    <circle cx="14" cy="12" r="3.2" fill="none" stroke={color} strokeWidth="2.6" />
+    <path d="m4 2 20 20" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" />
   </svg>
 );
 
 /* ─── Red main-account card (គណនីគោល) ─────────────────────────────────────── */
-const AccountCard = ({ show, setShow, onReceiveClick, onSendClick }: { show: boolean; setShow: (v: boolean) => void; onReceiveClick: () => void; onSendClick: () => void }) => {
+const AccountCard = ({ show, setShow, onReceiveClick, onSendClick, frosted = false, accountColor = '#E8002D' }: { show: boolean; setShow: (v: boolean) => void; onReceiveClick: () => void; onSendClick: () => void; frosted?: boolean; accountColor?: string }) => {
   const [, setLocation] = useLocation();
+  const accountIsLight = accountColor === '#F5F1E4';
+  const foreground = accountIsLight ? '#574936' : '#FFFFFF';
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}
@@ -245,31 +249,32 @@ const AccountCard = ({ show, setShow, onReceiveClick, onSendClick }: { show: boo
       transition={{ duration: 0.35 }}
       className="relative"
     >
-      <div className="rounded-[22px] overflow-hidden relative bg-[#E8002D] shadow-[0_6px_20px_rgba(232,0,45,0.25)]">
+      <div className="rounded-[22px] overflow-hidden relative shadow-[0_8px_24px_rgba(40,34,27,0.18)]" style={{ backgroundColor: accountColor, ...(frosted ? { border: '1px solid rgba(255,255,255,.55)' } : {}) }}>
         {/* Balance + eye row */}
         <div className="px-5 pt-5 pb-1 relative flex items-center gap-3">
           {show ? (
-            <DotMatrixAmount amount={`$${getBalance(defaultAccount.id, defaultAccount.balance)}`} />
+            <DotMatrixAmount amount={`$${getBalance(defaultAccount.id, defaultAccount.balance)}`} color={foreground} />
           ) : (
-            <HiddenBalanceDots />
+            <HiddenBalanceDots color={foreground} />
           )}
           <button
             onClick={() => setShow(!show)}
-            className="w-[42px] h-[38px] rounded-[12px] border border-white/45 bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors active:scale-95"
+            className="w-[42px] h-[38px] rounded-[12px] border flex items-center justify-center hover:bg-white/20 transition-colors active:scale-95"
+            style={{ borderColor: `${foreground}75`, backgroundColor: `${foreground}20` }}
             aria-label={show ? 'លាក់ចំនួនទឹកប្រាក់' : 'បង្ហាញចំនួនទឹកប្រាក់'}
           >
-            {show ? <EyeOffIconABA /> : <EyeIconABA />}
+            {show ? <EyeOffIconABA color={foreground} /> : <EyeIconABA color={foreground} />}
           </button>
         </div>
 
         {/* Account label */}
         <div className="px-5 pb-3 relative flex items-center gap-2">
-          <span className="text-[11px] font-bold bg-white text-gray-900 px-2 py-0.5 rounded">គណនីគោល</span>
-          <span className="text-[14px] font-bold text-white">{defaultAccount.name}</span>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded" style={{ backgroundColor: `${foreground}30`, color: foreground }}>គណនីគោល</span>
+          <span className="text-[14px] font-bold" style={{ color: foreground }}>{defaultAccount.name}</span>
         </div>
 
         {/* Actions row */}
-        <div className="flex items-center relative border-t border-white/20">
+        <div className="flex items-center relative border-t" style={{ borderColor: `${foreground}30` }}>
           {[
             { label: 'ទទួលលុយ', action: onReceiveClick, kind: 'receive' as const },
             { label: 'ផ្ញើលុយ', action: onSendClick, kind: 'send' as const },
@@ -281,9 +286,9 @@ const AccountCard = ({ show, setShow, onReceiveClick, onSendClick }: { show: boo
                 className="flex-1 py-3.5 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors active:scale-95"
               >
                 <DottedActionIcon kind={btn.kind} />
-                <span className="text-[12.5px] font-bold text-white">{btn.label}</span>
+                <span className="text-[12.5px] font-bold" style={{ color: foreground }}>{btn.label}</span>
               </button>
-              {i < 2 && <div className="w-[1px] h-6 bg-white/25" />}
+              {i < 2 && <div className="w-[1px] h-6" style={{ backgroundColor: `${foreground}30` }} />}
             </React.Fragment>
           ))}
         </div>
@@ -294,50 +299,55 @@ const AccountCard = ({ show, setShow, onReceiveClick, onSendClick }: { show: boo
 
 /* ─── Feature icons (line style, matches ABA official) ──────────────────────── */
 const IconFolder = () => (
-  <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="#374151" strokeWidth="1.8">
-    <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="17" cy="8" r="2" fill="#E8002D" stroke="none" />
+  <svg viewBox="0 0 48 48" className="w-10 h-10" aria-hidden="true">
+    <path d="M7 14a4 4 0 014-4h8l4 4h14a4 4 0 014 4v15a4 4 0 01-4 4H11a4 4 0 01-4-4z" fill="#F4C66A" />
+    <path d="M7 20h34v13a4 4 0 01-4 4H11a4 4 0 01-4-4z" fill="#E9A94F" />
+    <path d="M15 27h18" stroke="#FFF8E8" strokeWidth="3" strokeLinecap="round" />
+    <circle cx="34" cy="16" r="5" fill="#F18F80" />
   </svg>
 );
 
 const IconCard = () => (
-  <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="#374151" strokeWidth="1.8">
-    <rect x="3" y="6" width="18" height="13" rx="2.5" />
-    <line x1="3" y1="10" x2="21" y2="10" />
-    <line x1="7" y1="15" x2="11" y2="15" strokeLinecap="round" />
+  <svg viewBox="0 0 48 48" className="w-10 h-10" aria-hidden="true">
+    <rect x="6" y="11" width="36" height="26" rx="6" fill="#79B9B0" />
+    <path d="M6 18h36v6H6z" fill="#4B958F" />
+    <rect x="12" y="29" width="10" height="3" rx="1.5" fill="#EAF5E8" />
+    <circle cx="34" cy="30" r="3" fill="#F4C66A" />
   </svg>
 );
 
 const IconDollar = () => (
-  <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="#374151" strokeWidth="1.8">
-    <circle cx="12" cy="12" r="9" />
-    <path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1 1.8 2.5 2 2.5.8 2.5 2-1 2-2.5 2-2-.5-2.5-1.5M12 6v2M12 16v2" strokeLinecap="round" />
+  <svg viewBox="0 0 48 48" className="w-10 h-10" aria-hidden="true">
+    <circle cx="24" cy="24" r="17" fill="#F2B75C" />
+    <circle cx="24" cy="24" r="13" fill="#F8D982" />
+    <path d="M27.5 18.5c-1-1.2-2.2-1.8-3.8-1.8-2.2 0-3.7 1.2-3.7 3s1.5 2.6 3.7 3 3.8 1.2 3.8 3-1.5 3.2-3.8 3.2c-1.7 0-3.1-.7-4-2M24 13v3.5m0 15V35" fill="none" stroke="#8A6437" strokeWidth="2.2" strokeLinecap="round" />
   </svg>
 );
 
 const IconScan = () => (
-  <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="#374151" strokeWidth="1.8">
-    <path d="M4 7V5a1 1 0 011-1h2M17 4h2a1 1 0 011 1v2M20 17v2a1 1 0 01-1 1h-2M7 20H5a1 1 0 01-1-1v-2" strokeLinecap="round" />
-    <line x1="4" y1="12" x2="20" y2="12" stroke="#E8002D" strokeWidth="2" strokeLinecap="round" />
+  <svg viewBox="0 0 48 48" className="w-10 h-10" aria-hidden="true">
+    <rect x="9" y="9" width="30" height="30" rx="8" fill="#A8C6E0" />
+    <path d="M15 19v-3a2 2 0 012-2h3m8 0h3a2 2 0 012 2v3m0 10v3a2 2 0 01-2 2h-3m-8 0h-3a2 2 0 01-2-2v-3" fill="none" stroke="#527F9D" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M16 24h16" stroke="#E77F70" strokeWidth="3" strokeLinecap="round" />
   </svg>
 );
 
 const IconStar = () => (
-  <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="#374151" strokeWidth="1.8">
-    <path d="M12 3l2.5 5.5 6 .5-4.5 4 1.5 6L12 16l-5.5 3 1.5-6-4.5-4 6-.5L12 3z" strokeLinejoin="round" />
-    <circle cx="12" cy="12" r="2.5" fill="#E8002D" stroke="none" />
+  <svg viewBox="0 0 48 48" className="w-10 h-10" aria-hidden="true">
+    <path d="m24 6 5.3 11 12.2 1.8-8.8 8.6 2.1 12.2L24 33.8l-10.8 5.8 2.1-12.2-8.8-8.6 12.2-1.8z" fill="#F1C75B" />
+    <circle cx="24" cy="24" r="5" fill="#F8E9AC" />
   </svg>
 );
 
 const IconTransfer = () => (
-  <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="#374151" strokeWidth="1.8">
-    <path d="M7 7h13M7 7l4-4M7 7l4 4" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M17 17H4M17 17l-4-4M17 17l-4 4" strokeLinecap="round" strokeLinejoin="round" />
+  <svg viewBox="0 0 48 48" className="w-10 h-10" aria-hidden="true">
+    <circle cx="24" cy="24" r="17" fill="#B2C7A3" />
+    <path d="M13 18h21m-5-5 5 5-5 5M35 30H14m5-5-5 5 5 5" fill="none" stroke="#56704D" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-/* ─── 3×2 Feature Grid (light theme, line icons) ────────────────────────────── */
-const FeatureGrid = () => {
+/* ─── 3×2 Feature Grid ─────────────────────────────────────────────────────── */
+const FeatureGrid = ({ frosted = false }: { frosted?: boolean }) => {
   const [, setLocation] = useLocation();
   const items = [
     { label: 'គណនី', icon: <IconFolder />, route: '/accounts' },
@@ -357,10 +367,10 @@ const FeatureGrid = () => {
           transition={{ delay: 0.05 + i * 0.03 }}
           whileTap={{ scale: 0.94 }}
           onClick={() => item.route && setLocation(item.route)}
-          className="bg-white rounded-[18px] py-4 px-2 flex flex-col items-center justify-center gap-2 shadow-[0_1px_6px_rgba(0,0,0,0.05)] active:bg-gray-50"
+          className={`rounded-[18px] border py-4 px-2 flex flex-col items-center justify-center gap-2 shadow-[0_6px_18px_rgba(40,34,27,0.1)] active:bg-white/70 ${frosted ? 'border-white/45 bg-[#f7f0dd]/85 backdrop-blur-md' : 'border-transparent bg-white'}`}
         >
           {item.icon}
-          <span className="text-[11px] font-bold text-gray-700 leading-tight text-center">{item.label}</span>
+          <span className="text-[11px] font-bold text-[#584c3d] leading-tight text-center">{item.label}</span>
         </motion.button>
       ))}
     </div>
@@ -368,7 +378,7 @@ const FeatureGrid = () => {
 };
 
 /* ─── Horizontal scroll pills (មីនីអេប / អាជីវករ ABA / ការទូទាត់ស្វ័យ) ─────── */
-const ScrollPills = () => {
+const ScrollPills = ({ frosted = false }: { frosted?: boolean }) => {
   const [, setLocation] = useLocation();
   const pills = [
     { label: 'មីនីអេប', icon: <LayoutGrid className="w-5 h-5 text-gray-600" strokeWidth={1.8} />, route: null },
@@ -382,10 +392,10 @@ const ScrollPills = () => {
           key={p.label}
           whileTap={{ scale: 0.96 }}
           onClick={() => p.route && setLocation(p.route)}
-          className="shrink-0 flex items-center gap-2 bg-white rounded-full px-4 py-2.5 shadow-[0_1px_6px_rgba(0,0,0,0.05)]"
+          className={`shrink-0 flex items-center gap-2 rounded-full px-4 py-2.5 shadow-[0_4px_14px_rgba(40,34,27,0.1)] ${frosted ? 'border border-white/40 bg-[#f7f0dd]/80 backdrop-blur-md' : 'bg-white'}`}
         >
-          {p.icon}
-          <span className="text-[12px] font-bold text-gray-700 whitespace-nowrap">{p.label}</span>
+          <span className={frosted ? 'text-[#766448]' : ''}>{p.icon}</span>
+          <span className="text-[12px] font-bold text-[#584c3d] whitespace-nowrap">{p.label}</span>
         </motion.button>
       ))}
     </div>
@@ -536,12 +546,12 @@ const miniApps = [
   { name: 'ប៊ុកមីបាស', icon: <BusIcon /> },
 ];
 
-const MiniAppsSection = () => {
+const MiniAppsSection = ({ frosted = false }: { frosted?: boolean }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   return (
     <div className="space-y-2.5">
-      <h3 className="text-[15px] font-extrabold text-gray-900">មីនីអេប</h3>
-      <div className="relative bg-white rounded-2xl px-3 py-4 shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
+      <h3 className={`text-[15px] font-extrabold ${frosted ? 'text-white drop-shadow' : 'text-gray-900'}`}>មីនីអេប</h3>
+      <div className={`relative rounded-2xl border px-3 py-4 shadow-[0_8px_24px_rgba(40,34,27,0.13)] ${frosted ? 'border-white/40 bg-[#f7f0dd]/45 backdrop-blur-lg' : 'border-transparent bg-white shadow-[0_1px_6px_rgba(0,0,0,0.05)]'}`}>
         <div ref={scrollRef} className="flex overflow-x-auto hide-scrollbar gap-5 px-2">
           {miniApps.map(app => (
             <div key={app.name} className="flex flex-col items-center gap-1.5 shrink-0">
@@ -551,7 +561,7 @@ const MiniAppsSection = () => {
               >
                 {app.icon}
               </motion.div>
-              <span className="text-[10px] font-bold text-gray-600 text-center leading-tight max-w-[64px]">
+              <span className={`text-[10px] font-bold text-center leading-tight max-w-[64px] ${frosted ? 'text-white drop-shadow' : 'text-gray-600'}`}>
                 {app.name}
               </span>
             </div>
@@ -741,7 +751,7 @@ const SendOptionsSheet = ({ open, onClose }: { open: boolean; onClose: () => voi
 };
 
 /* ─── Discover Section (ការស្វែងរកថ្មីៗ) ───────────────────────────────────── */
-const DiscoverSection = () => {
+const DiscoverSection = ({ onCustomize, frosted = false }: { onCustomize: () => void; frosted?: boolean }) => {
   const cards = [
     {
       title: 'កំណត់ផ្សេងៗ\nកាន់តែស្រួល',
@@ -852,7 +862,7 @@ const DiscoverSection = () => {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-[18px] font-extrabold text-gray-900">ការស្វែងរកថ្មីៗ</h3>
+      <h3 className={`text-[18px] font-extrabold ${frosted ? 'text-white drop-shadow' : 'text-gray-900'}`}>ការស្វែងរកថ្មីៗ</h3>
       <div className="flex overflow-x-auto hide-scrollbar gap-3 -mx-4 px-4 pb-2">
         {cards.map((card, i) => (
           <motion.div
@@ -873,7 +883,7 @@ const DiscoverSection = () => {
         ))}
       </div>
       <div className="flex justify-center pt-1">
-        <button className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-7 py-3 rounded-full text-[14px] font-bold shadow-lg transition-colors active:scale-95">
+        <button type="button" onClick={onCustomize} className="flex items-center gap-2 bg-[#f7f0dd]/90 hover:bg-white text-[#584c3d] px-7 py-3 rounded-full text-[14px] font-bold shadow-lg transition-colors active:scale-95">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
             <path d="M12 20h9" strokeLinecap="round" />
             <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" strokeLinecap="round" strokeLinejoin="round" />
@@ -886,7 +896,7 @@ const DiscoverSection = () => {
 };
 
 /* ─── Bottom Nav ────────────────────────────────────────────────────────────── */
-const BottomNav = ({ active, setActive }: { active: string; setActive: (v: string) => void }) => {
+const BottomNav = ({ active, setActive, frosted = false }: { active: string; setActive: (v: string) => void; frosted?: boolean }) => {
   const [, setLocation] = useLocation();
   const tabs = [
     { id: 'Home', Icon: HomeIcon, route: '/' },
@@ -895,7 +905,7 @@ const BottomNav = ({ active, setActive }: { active: string; setActive: (v: strin
     { id: 'More', Icon: LayoutGrid, route: null },
   ];
   return (
-    <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 pt-2.5 pb-7 md:pb-5 z-30 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+    <div className={`absolute bottom-0 left-0 right-0 border-t px-6 pt-2.5 pb-7 md:pb-5 z-30 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] ${frosted ? 'border-white/45 bg-[#f7f0dd]/85 backdrop-blur-lg' : 'border-gray-100 bg-white'}`}>
       <div className="flex justify-between items-center">
         {tabs.map(({ id, Icon, route }) => {
           const on = active === id;
@@ -921,13 +931,33 @@ export default function Home() {
   const [showBalance, setShowBalance] = useState(true);
   const [showSendSheet, setShowSendSheet] = useState(false);
   const [showReceiveSheet, setShowReceiveSheet] = useState(false);
+  const [showThemePicker, setShowThemePicker] = useState(false);
+  const [activeTab, setActiveTab] = useState('Home');
+  const [themeId, setThemeId] = useState<HomeThemeId>(() => {
+    if (typeof window === 'undefined') return 'angkor';
+    const savedTheme = window.localStorage.getItem('aba.home.theme');
+    return HOME_THEMES.find((theme) => theme.id === savedTheme)?.id ?? 'angkor';
+  });
+  const activeTheme = HOME_THEMES.find((theme) => theme.id === themeId) ?? HOME_THEMES[0];
+  const frosted = themeId !== 'classic';
 
   return (
     <div className="min-h-[100dvh] md:h-screen md:min-h-screen bg-gray-300 flex items-center justify-center md:p-4 font-sans select-none">
-      <div className="w-full h-[100dvh] md:h-[844px] md:max-w-[390px] bg-[#F3F2F7] md:rounded-[2.5rem] shadow-2xl relative overflow-hidden md:border-[8px] border-black flex flex-col">
+      <div
+        className="w-full h-[100dvh] md:h-[844px] md:max-w-[390px] md:rounded-[2.5rem] shadow-2xl relative overflow-hidden md:border-[8px] border-black flex flex-col bg-cover bg-center"
+        style={{
+          backgroundColor: activeTheme.background,
+          ...(themeId === 'angkor'
+            ? {
+                backgroundImage: `linear-gradient(rgba(49, 62, 53, .25), rgba(87, 67, 52, .3)), url(${angkorWallpaper})`,
+                backgroundPosition: 'center',
+              }
+            : {}),
+        }}
+      >
 
         <div className="relative flex-1 overflow-y-auto hide-scrollbar z-10 pb-28">
-          <TopHeader />
+          <TopHeader frosted={frosted} />
 
           <div className="px-4 space-y-4 pb-6 pt-1">
             <AccountCard
@@ -935,21 +965,35 @@ export default function Home() {
               setShow={setShowBalance}
               onReceiveClick={() => setShowReceiveSheet(true)}
               onSendClick={() => setShowSendSheet(true)}
+              frosted={frosted}
+              accountColor={activeTheme.account}
             />
-            <FeatureGrid />
-            <ScrollPills />
+            <FeatureGrid frosted={frosted} />
+            <ScrollPills frosted={frosted} />
 
             {/* News & Promotion */}
             <div className="space-y-2.5">
-              <h3 className="text-[15px] font-extrabold text-gray-900">ដំណឹង & ប្រូម៉ូសិន</h3>
+              <h3 className={`text-[15px] font-extrabold ${frosted ? 'text-white drop-shadow' : 'text-gray-900'}`}>ដំណឹង & ប្រូម៉ូសិន</h3>
               <NewsBanner />
             </div>
 
-            <MiniAppsSection />
-            <DiscoverSection />
+            <MiniAppsSection frosted={frosted} />
+            <DiscoverSection frosted={frosted} onCustomize={() => setShowThemePicker(true)} />
           </div>
         </div>
 
+        <BottomNav active={activeTab} setActive={setActiveTab} frosted={frosted} />
+        {showThemePicker && (
+          <HomeThemePicker
+            activeTheme={themeId}
+            onApply={(selectedTheme) => {
+              window.localStorage.setItem('aba.home.theme', selectedTheme);
+              setThemeId(selectedTheme);
+              setShowThemePicker(false);
+            }}
+            onClose={() => setShowThemePicker(false)}
+          />
+        )}
         <SendOptionsSheet open={showSendSheet} onClose={() => setShowSendSheet(false)} />
         <ReceiveOptionsSheet open={showReceiveSheet} onClose={() => setShowReceiveSheet(false)} />
       </div>
