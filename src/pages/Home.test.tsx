@@ -20,29 +20,34 @@ describe('Home page → Cards entry', () => {
     window.localStorage.clear();
   });
 
-  it('renders a Cards tile that navigates to /cards', async () => {
+  it('renders a Cards action that navigates to /cards', async () => {
     const user = userEvent.setup();
     const { navigate } = renderWithMemoryLocation(<Home />);
 
-    const cardsTile = screen.getByRole('button', { name: /កាត/ });
-    expect(cardsTile).toBeInTheDocument();
+    const cardsButton = screen.getByRole('button', { name: 'Cards' });
+    expect(cardsButton).toBeInTheDocument();
 
-    await user.click(cardsTile);
+    await user.click(cardsButton);
     expect(navigate).toHaveBeenCalledTimes(1);
     expect(navigate.mock.calls[0][0]).toBe('/cards');
   });
 
-  it('opens the home theme picker and saves the selected theme', async () => {
+  it('switches between the new and classic home designs and saves the choice', async () => {
     const user = userEvent.setup();
+    const { unmount } = renderWithMemoryLocation(<Home />);
+
+    expect(screen.getByRole('region', { name: 'Account overview' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '切换主页设计' }));
+    expect(window.localStorage.getItem('aba.home.layout')).toBe('classic');
+    expect(screen.getByRole('button', { name: '切换主页设计' })).toBeInTheDocument();
+
+    unmount();
     renderWithMemoryLocation(<Home />);
+    expect(screen.queryByRole('region', { name: 'Account overview' })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /កែអេក្រង់ដើម/ }));
-    expect(screen.getByRole('dialog', { name: 'ស្បែកអេក្រង់' })).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: 'ស្បែក មេឃស្រស់' }));
-    await user.click(screen.getByRole('button', { name: 'ប្រើប្រាស់' }));
-
-    expect(window.localStorage.getItem('aba.home.theme')).toBe('sky');
-    expect(screen.queryByRole('dialog', { name: 'ស្បែកអេក្រង់' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '切换主页设计' }));
+    expect(window.localStorage.getItem('aba.home.layout')).toBe('new');
+    expect(screen.getByRole('region', { name: 'Account overview' })).toBeInTheDocument();
   });
 });

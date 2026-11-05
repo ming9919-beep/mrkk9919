@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'wouter';
 import {
-  Bell, Eye, EyeOff, CreditCard, QrCode, Star, MessageCircle,
+  Bell, Eye, EyeOff, CreditCard, QrCode, Star, MessageCircle, Repeat2,
   ArrowRightLeft, Wallet, LayoutGrid, Store, CalendarClock,
   ChevronLeft, ChevronRight, Home as HomeIcon, Clock, Link2
 } from 'lucide-react';
 import { defaultAccount } from '../data/accounts';
 import { getBalance } from '../lib/balanceStore';
+import HomeRedesign from './HomeRedesign';
 import promo0 from '@/assets/promo_0.webp';
 import promo1 from '@/assets/promo_1.webp';
 import promo2 from '@/assets/promo_2.webp';
@@ -55,7 +56,7 @@ const getGreeting = () => {
 };
 
 /* ─── Top Header (light theme) ──────────────────────────────────────────────── */
-const TopHeader = () => {
+const TopHeader = ({ onSwitch }: { onSwitch: () => void }) => {
   const [, setLocation] = useLocation();
   return (
     <div className="px-4 pt-12 pb-3 flex items-center justify-between">
@@ -72,7 +73,7 @@ const TopHeader = () => {
           <p className="text-[20px] font-extrabold text-gray-900 leading-none tracking-tight">Yukheang</p>
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <button
           onClick={() => setLocation('/chat')}
           className="text-gray-700 hover:opacity-70 transition-opacity"
@@ -88,7 +89,7 @@ const TopHeader = () => {
           <Bell className="w-[24px] h-[24px]" strokeWidth={2} />
           <span className="absolute -top-0.5 -right-0.5 w-[9px] h-[9px] bg-[#E8002D] rounded-full border-2 border-[#F3F2F7]" />
         </button>
-        <button className="text-gray-700 hover:opacity-70 transition-opacity" aria-label="Cards">
+        <button onClick={() => setLocation('/cards')} className="text-gray-700 hover:opacity-70 transition-opacity" aria-label="Cards">
           <CreditCard className="w-[24px] h-[24px]" strokeWidth={2} />
         </button>
         <button
@@ -97,6 +98,15 @@ const TopHeader = () => {
           aria-label="ABA Pay QR"
         >
           <QrCode className="w-[20px] h-[20px] text-white" strokeWidth={2.2} />
+        </button>
+        <button
+          type="button"
+          onClick={onSwitch}
+          className="text-gray-700 hover:opacity-70 transition-opacity"
+          aria-label="切换主页设计"
+          title="切换主页设计"
+        >
+          <Repeat2 className="w-5 h-5" strokeWidth={2} />
         </button>
       </div>
     </div>
@@ -922,13 +932,26 @@ export default function Home() {
   const [showBalance, setShowBalance] = useState(true);
   const [showSendSheet, setShowSendSheet] = useState(false);
   const [showReceiveSheet, setShowReceiveSheet] = useState(false);
+  const [homeDesign, setHomeDesign] = useState<'new' | 'classic'>(() => {
+    if (typeof window === 'undefined') return 'new';
+    return window.localStorage.getItem('aba.home.layout') === 'classic' ? 'classic' : 'new';
+  });
+  const toggleHomeDesign = () => {
+    const nextDesign = homeDesign === 'new' ? 'classic' : 'new';
+    window.localStorage.setItem('aba.home.layout', nextDesign);
+    setHomeDesign(nextDesign);
+  };
+
+  if (homeDesign === 'new') {
+    return <HomeRedesign onSwitch={toggleHomeDesign} />;
+  }
 
   return (
     <div className="min-h-[100dvh] md:h-screen md:min-h-screen bg-gray-300 flex items-center justify-center md:p-4 font-sans select-none">
       <div className="w-full h-[100dvh] md:h-[844px] md:max-w-[390px] bg-[#F3F2F7] md:rounded-[2.5rem] shadow-2xl relative overflow-hidden md:border-[8px] border-black flex flex-col">
 
         <div className="relative flex-1 overflow-y-auto hide-scrollbar z-10 pb-28">
-          <TopHeader />
+          <TopHeader onSwitch={toggleHomeDesign} />
 
           <div className="px-4 space-y-4 pb-6 pt-1">
             <AccountCard
