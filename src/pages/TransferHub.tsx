@@ -2,9 +2,10 @@ import React, { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import {
   ArrowLeft, ArrowRightLeft, Send, Landmark, Wallet, AtSign, Globe,
-  CreditCard, Banknote, User, ChevronRight,
+  CreditCard, ChevronRight,
 } from 'lucide-react';
 import { getPendingTransfer } from '@/lib/transferState';
+import RiaLogo from '@/components/RiaLogo';
 
 /* ─── Cambodia temple watermark ────────────────────────────────────────────── */
 const TemplePattern = () => (
@@ -51,7 +52,7 @@ const localCards: { icon: React.ReactNode; bg: string; title: string; sub: strin
 const intlRows: { icon: React.ReactNode; label: string; sub: string; brand?: string }[] = [
   { icon: <Globe className="w-5 h-5 text-[#2E6FD8]" strokeWidth={2.1} />, label: 'SWIFT', sub: 'សេវាផ្ទេរប្រាក់ឆ្លងប្រទេស' },
   { icon: <Send className="w-5 h-5 text-[#E8002D]" strokeWidth={2.1} />, label: 'Western Union', sub: 'ផ្ទេរ/ទទួលប្រាក់' },
-  { icon: <Banknote className="w-5 h-5 text-[#F59E0B]" strokeWidth={2.1} />, label: 'Ria', sub: 'សេវាផ្ទេរ/ទទួលប្រាក់ Ria' },
+  { icon: <RiaLogo className="w-[94px] h-auto" />, label: 'Ria', sub: 'សេវាផ្ទេរ/ទទួលប្រាក់ Ria', brand: 'Ria' },
   { icon: <Globe className="w-5 h-5 text-[#16A34A]" strokeWidth={2.1} />, label: 'DBP Remittance', sub: 'ផ្ទេរប្រាក់' },
   { icon: <Send className="w-5 h-5 text-[#7B4FE8]" strokeWidth={2.1} />, label: 'MoneyGram', sub: 'សេវាផ្ទេរ/ទទួលប្រាក់ MoneyGram' },
 ];
@@ -188,7 +189,7 @@ export default function TransferHub() {
         <div className="rounded-3xl bg-white shadow-[0_2px_10px_rgba(0,0,0,0.05)] px-5 py-2 divide-y divide-gray-100">
           {intlRows.map((r) => (
             <button key={r.label} className="w-full py-3.5 flex items-center gap-4 text-left active:bg-gray-50 transition-colors">
-              <span className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center shrink-0">{r.icon}</span>
+              <span className={`h-9 rounded-xl flex items-center justify-center shrink-0 ${r.brand === 'Ria' ? 'w-[96px]' : 'w-9 bg-gray-50'}`}>{r.icon}</span>
               <span className="flex-1 min-w-0">
                 <span className="block text-[14px] font-bold text-gray-900">{r.label}</span>
                 <span className="block text-[11px] text-gray-500 mt-0.5 leading-snug truncate">{r.sub}</span>

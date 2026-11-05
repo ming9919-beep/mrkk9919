@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import {
   ArrowLeft, ArrowRight, ArrowUpRight, CalendarDays, Check, ChevronRight, Search, X,
 } from 'lucide-react';
+import RiaLogo from '../components/RiaLogo';
 
 type Channel = {
   name: string;
@@ -40,6 +41,10 @@ const cardChannels: Channel[] = [
 ];
 
 function BrandMark({ channel, small = false }: { channel: Channel; small?: boolean }) {
+  if (channel.name === 'Ria') {
+    return <RiaLogo className="w-[126px] h-[42px] flex-shrink-0" />;
+  }
+
   return (
     <span
       className="inline-flex items-center justify-center rounded-full flex-shrink-0"
