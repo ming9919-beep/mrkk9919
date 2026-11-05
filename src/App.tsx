@@ -8,6 +8,7 @@ import { Route, Switch, Router as WouterRouter } from 'wouter';
 import Home from '@/pages/Home';
 import Accounts from '@/pages/Accounts';
 import AccountDetail from '@/pages/AccountDetail';
+import EditAccount from '@/pages/EditAccount';
 import TransactionDetail from '@/pages/TransactionDetail';
 import Scanner from '@/pages/Scanner';
 import PayFlow from '@/pages/PayFlow';
@@ -49,6 +50,7 @@ function Router() {
       <Route path="/banks" component={Banks} />
       <Route path="/notifications" component={Notifications} />
       <Route path="/chat" component={Chat} />
+      <Route path="/accounts/:id/edit" component={EditAccount} />
       <Route path="/accounts/:id/tx/:txId" component={TransactionDetail} />
       <Route path="/accounts/:id" component={AccountDetail} />
       <Route component={NotFound} />
