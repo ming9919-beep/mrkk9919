@@ -20,11 +20,12 @@ const shortcuts = [
 ];
 
 const providers = [
-  { title: 'Cellcard', khmer: 'សែលកាត', Icon: Smartphone, color: '#cf5662', route: '/pay' },
-  { title: 'Smart', khmer: 'ស្មាត', Icon: Smartphone, color: '#398d70', route: '/pay' },
-  { title: 'Cinema', khmer: 'សំបុត្រកុន', Icon: Receipt, color: '#80649b', route: '/payments' },
-  { title: 'Markets', khmer: 'ផ្សារ និងហាង', Icon: ShoppingBag, color: '#c8874e', route: '/payments' },
-  { title: 'Travel', khmer: 'ទេសចរណ៍', Icon: ArrowRightLeft, color: '#507d82', route: '/payments' },
+  { title: 'metfone', khmer: 'សេវាកម្មមិត្តហ្វូន', mark: 'metfone', Icon: Smartphone, color: '#e8002d', route: '/pay' },
+  { title: 'Smart', khmer: 'ស្មាត អាស្យាកា', mark: 'Smart\n5G', Icon: Smartphone, color: '#00a651', route: '/pay' },
+  { title: 'Cinema', khmer: 'សំបុត្រកុន', mark: 'play', Icon: Receipt, color: '#8037bb', route: '/payments' },
+  { title: 'VET Express', khmer: 'វីអ៊ីធី អេ ចប្រេស', mark: 'VET', Icon: ShoppingBag, color: '#ee8b36', route: '/payments' },
+  { title: 'Cambo 21', khmer: 'ខេមបូ-លីង 21 អិចប្រេស', mark: '21', Icon: ArrowRightLeft, color: '#2879ae', route: '/payments' },
+  { title: 'BookMeBus', khmer: 'ប៊ុកមីបាស', mark: 'BUS', Icon: Smartphone, color: '#dc4e58', route: '/payments' },
 ];
 
 const tools = [
@@ -42,6 +43,76 @@ const tabs = [
   { label: 'ផ្សេងៗ', Icon: Grid2X2, route: '/settings' },
 ];
 
+function ShortcutIllustration({ index }: { index: number }) {
+  const drawings = [
+    <>
+      <ellipse cx="25" cy="33" rx="14" ry="5" fill="#e99779" />
+      <path d="M12 30q13-19 27-1l-4 9H17z" fill="#81aaa0" stroke="#527b72" strokeWidth="1.5" />
+      <ellipse cx="25" cy="30" rx="10" ry="4" fill="#f3d9a0" stroke="#527b72" strokeWidth="1.5" />
+      <circle cx="23" cy="30" r="5" fill="#bd6555" />
+      <path d="m18 27 9 5m-8 0 7-5" stroke="#e8c879" strokeWidth="1.5" />
+    </>,
+    <>
+      <rect x="7" y="12" width="36" height="27" rx="5" fill="#83b9aa" stroke="#527b72" strokeWidth="1.5" />
+      <rect x="11" y="16" width="28" height="14" rx="2" fill="#eecb81" />
+      <path d="M15 19h20m-18 4h16m-16 4h11" stroke="#b65c51" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="34" cy="35" r="2" fill="#f5eee0" />
+    </>,
+    <>
+      <path d="M8 20 24 11l19 9-17 9z" fill="#e7bd72" stroke="#987442" strokeWidth="1.5" />
+      <path d="m9 21 17 10v12L9 33z" fill="#d88468" stroke="#987442" strokeWidth="1.5" />
+      <path d="m26 31 17-11v13L26 43z" fill="#83aaa0" stroke="#527b72" strokeWidth="1.5" />
+      <path d="m18 22 17-8 7 4-17 9z" fill="#f5e5bb" stroke="#987442" strokeWidth="1.5" />
+      <circle cx="29" cy="22" r="4" fill="#d86d5f" />
+    </>,
+    <>
+      <rect x="7" y="13" width="36" height="26" rx="7" fill="#7fa9a0" stroke="#527b72" strokeWidth="1.5" />
+      <path d="M15 13 19 8h12l4 5" fill="#e9c779" stroke="#527b72" strokeWidth="1.5" />
+      <rect x="12" y="18" width="25" height="15" rx="3" fill="#e8c983" />
+      <circle cx="24" cy="25" r="7" fill="#bd6555" />
+      <circle cx="24" cy="25" r="4" fill="#f3dca5" />
+      <circle cx="24" cy="25" r="1.5" fill="#527b72" />
+    </>,
+    <>
+      <circle cx="25" cy="25" r="17" fill="#d88468" />
+      <circle cx="25" cy="25" r="12" fill="#f2dbab" />
+      <path d="M17 29a9 9 0 0 1 16-6M33 21l1 5-5-1" fill="none" stroke="#527b72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M25 14v4m0 14v4m-11-11h4m14 0h4" stroke="#b8844c" strokeWidth="1.5" />
+    </>,
+    <>
+      <rect x="7" y="15" width="36" height="25" rx="5" fill="#86aaa0" stroke="#527b72" strokeWidth="1.5" />
+      <path d="M18 15v-4h14v4M12 21h26" fill="none" stroke="#e8c879" strokeWidth="2" />
+      <path d="m14 34 7-6 6 3 10-9m-5 0h5v5" fill="none" stroke="#bd6555" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </>,
+  ];
+
+  return (
+    <svg viewBox="0 0 50 50" className="h-full w-full" aria-hidden="true">
+      {drawings[index]}
+    </svg>
+  );
+}
+
+function GramophoneIllustration() {
+  return (
+    <svg viewBox="0 0 100 100" className="h-[98px] w-[98px]" aria-hidden="true">
+      <path d="M66 12c-10-9-24-8-30 0-5 6-2 13 5 17l11 6 22-12c1-4-2-8-8-11Z" fill="#e8b866" stroke="#547b71" strokeWidth="2" />
+      <path d="m46 31 23-13m-19 18 24-14m-29 9 23-13" stroke="#b77955" strokeWidth="1.5" />
+      <path d="M52 34 40 56" stroke="#527b72" strokeWidth="3" strokeLinecap="round" />
+      <path d="M40 56c3 7 8 9 13 9" fill="none" stroke="#527b72" strokeWidth="3" strokeLinecap="round" />
+      <path d="M25 58h49l-4 20H29z" fill="#80a99d" stroke="#527b72" strokeWidth="2" />
+      <path d="M30 63h39m-36 5h33m-31 6h28" stroke="#e8c879" strokeWidth="2" />
+      <ellipse cx="49" cy="57" rx="24" ry="7" fill="#e6c77e" stroke="#527b72" strokeWidth="2" />
+      <ellipse cx="49" cy="56" rx="16" ry="4.5" fill="#536e67" />
+      <circle cx="49" cy="56" r="3" fill="#d16f5f" />
+      <circle cx="49" cy="56" r="1" fill="#f7edce" />
+      <path d="M36 79v5m27-5v5m-34 2h45" stroke="#527b72" strokeWidth="3" strokeLinecap="round" />
+      <path d="M16 35c-4-3-4-7 0-10m4 13c-5-5-5-11 0-16m59 6c4-3 4-7 0-10" fill="none" stroke="#c87866" strokeWidth="2" strokeLinecap="round" />
+      <path d="m17 18 2-4 2 4 4 2-4 2-2 4-2-4-4-2z" fill="#c87866" />
+    </svg>
+  );
+}
+
 export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
   const [, setLocation] = useLocation();
   const [showBalance, setShowBalance] = useState(true);
@@ -50,7 +121,7 @@ export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
     <main className="relative mx-auto flex h-[100dvh] min-h-[620px] w-full max-w-[390px] flex-col overflow-hidden bg-[#756f5c] font-sans text-[#463e35]">
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `linear-gradient(180deg,rgba(49,67,59,.55),rgba(67,61,49,.55)),url(${angkorWallpaper})` }}
+        style={{ backgroundImage: `linear-gradient(180deg,rgba(49,67,59,.39),rgba(67,61,49,.48)),url(${angkorWallpaper})` }}
         aria-hidden="true"
       />
       <div className="relative flex-1 overflow-y-auto px-4 pb-5 pt-4 [scrollbar-width:none]">
@@ -81,7 +152,7 @@ export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
           </div>
           <button type="button" onClick={() => setLocation('/settings/profile')} className="mt-4 flex items-center gap-3 text-left text-[#fff9ec]">
             <span className="grid h-12 w-12 place-items-center rounded-full border-2 border-[#fff8e6]/80 bg-gradient-to-br from-[#f0d88a] via-[#c98066] to-[#385c5d] font-bold text-white shadow-lg">
-              Y
+              <span className="text-xl">Y</span>
             </span>
             <span>
               <span className="block text-xs opacity-90">សួស្តី!</span>
@@ -91,8 +162,11 @@ export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
           </button>
         </header>
 
-        <section className="rounded-[23px] border border-white/65 bg-[#faf7e9]/95 p-4 shadow-xl backdrop-blur-xl" aria-label="Account overview">
-          <div className="flex items-start justify-between">
+        <section className="relative overflow-hidden rounded-[23px] border border-white/65 bg-[#faf7e9]/95 p-4 shadow-xl backdrop-blur-xl" aria-label="Account overview">
+          <div className="pointer-events-none absolute right-3 top-2 opacity-95">
+            <GramophoneIllustration />
+          </div>
+          <div className="relative z-[1] flex items-start justify-between pr-24">
             <div>
               <p className="mb-1 text-[11px] font-semibold text-[#82786a]">Available balance</p>
               <p className="text-[25px] font-bold tracking-tight text-[#443e34]" data-balance>
@@ -109,13 +183,13 @@ export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
               {showBalance ? <EyeOff size={19} /> : <Eye size={19} />}
             </button>
           </div>
-          <div className="mt-2 flex items-center gap-2 text-[10px] text-[#776c5e]">
+          <div className="relative z-[1] mt-2 flex items-center gap-2 text-[10px] text-[#776c5e]">
             <span className="rounded-md bg-[#e3ebd9] px-2 py-1 text-[#527563]">គណនីគោល</span>
             <span>{defaultAccount.name}</span>
             <span className="tracking-wider">•• {defaultAccount.number.slice(-4)}</span>
           </div>
-          <div className="my-3 h-px bg-[#665b47]/10" />
-          <div className="grid grid-cols-3">
+          <div className="relative z-[1] my-3 h-px bg-[#665b47]/10" />
+          <div className="relative z-[1] grid grid-cols-3">
             {[
               { label: 'គណនី', Icon: Wallet, route: '/accounts' },
               { label: 'ផ្ទេរប្រាក់', Icon: Send, route: '/transfer' },
@@ -136,15 +210,15 @@ export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
 
         <section className="mt-5">
           <div className="grid grid-cols-3 gap-2">
-            {shortcuts.map(({ label, english, Icon, tint, route }) => (
+            {shortcuts.map(({ label, english, tint, route }, index) => (
               <button
                 type="button"
                 key={english}
                 onClick={() => setLocation(route)}
                 className="flex min-h-[98px] flex-col items-center justify-center gap-2 rounded-[20px] border border-white/65 bg-[#faf7ea]/95 text-[#6b5749] shadow-lg transition-transform active:scale-95"
               >
-                <span className={`grid h-10 w-10 place-items-center rounded-[14px] ${tint}`}>
-                  <Icon size={22} />
+                <span className={`grid h-11 w-11 place-items-center rounded-[14px] ${tint}`}>
+                  <ShortcutIllustration index={index} />
                 </span>
                 <span className="flex flex-col items-center text-center text-[10px] font-semibold leading-snug">
                   {label}
@@ -153,6 +227,7 @@ export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
               </button>
             ))}
           </div>
+          <div className="my-3 h-px shrink-0 bg-white/30" />
           <div className="mt-2 flex gap-2 overflow-x-auto [scrollbar-width:none]">
             {[
               { label: 'មីនីអាប់', Icon: Smartphone, route: '/settings/features' },
@@ -203,10 +278,12 @@ export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
             </button>
           </div>
           <div className="flex gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none]">
-            {providers.map(({ title, khmer, Icon, color, route }) => (
+            {providers.map(({ title, khmer, mark, Icon, color, route }) => (
               <button type="button" key={title} onClick={() => setLocation(route)} className="flex min-h-[135px] w-[100px] shrink-0 flex-col items-center rounded-[21px] border border-white/45 bg-[#f1ebd8]/85 px-2 py-3 shadow-lg">
-                <span className="mb-2 grid h-[66px] w-[66px] place-items-center rounded-[19px] border-2 border-white/80 text-white shadow-md" style={{ backgroundColor: color }}>
-                  <Icon size={25} />
+                <span className={`relative mb-2 grid h-[66px] w-[66px] place-items-center rounded-[19px] border-2 border-white/80 text-white shadow-md ${mark === 'play' ? 'bg-gradient-to-br from-violet-600 via-pink-500 to-amber-400' : ''}`} style={mark === 'play' ? undefined : { backgroundColor: color }}>
+                  {mark === 'play'
+                    ? <Icon size={27} fill="white" />
+                    : <span className={`px-1 text-center font-extrabold leading-tight ${mark.length > 4 ? 'text-[9px]' : 'text-sm'} ${mark.includes('\n') ? 'whitespace-pre-line' : ''}`}>{mark}</span>}
                 </span>
                 <span className="text-[10px] font-bold text-[#584c41]">{title}</span>
                 <span className="mt-1 text-center text-[9px] leading-snug text-[#817563]">{khmer}</span>
