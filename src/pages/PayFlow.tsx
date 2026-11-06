@@ -255,8 +255,10 @@ const SuccessScreen = ({
 }) => {
   const [, setLocation] = useLocation();
   const now = new Date();
-  const stamp = `${now.getMonth() + 1} តុលា | ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-  const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) + ' | ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + 'PM';
+  const KM_MONTHS = ['មករា','កុម្ភៈ','មីនា','មេសា','ឧសភា','មិថុនា','កក្កដា','សីហា','កញ្ញា','តុលា','វិច្ឆិកា','ធ្នូ'];
+  const stamp = `${now.getDate()} ${KM_MONTHS[now.getMonth()]} | ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    + ' | ' + `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
   const ref1 = Math.random().toString(16).slice(2, 10);
   const ref2 = String(Math.floor(Math.random() * 9e11) + 1e11);
   const amt = currency === 'USD' ? `-${parseFloat(amount || '0.01').toFixed(2)} USD` : `-${amount} KHR`;

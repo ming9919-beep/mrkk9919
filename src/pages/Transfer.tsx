@@ -399,7 +399,7 @@ const SuccessScreen = ({ data, amount, currency, payeeAmount, payeeCurrency, onD
   if (isBakong) {
     const KM_MONTHS = ['មករា','កុម្ភៈ','មីនា','មេសា','ឧសភា','មិថុនា','កក្កដា','សីហា','កញ្ញា','តុលា','វិច្ឆិកា','ធ្នូ'];
     const hash = Math.random().toString(16).slice(2, 10);
-    const kmTime = `${now.getDate()} ${KM_MONTHS[now.getMonth()]} | ${now.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+    const kmTime = `${now.getDate()} ${KM_MONTHS[now.getMonth()]} | ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
     const bkDetails: [string, string][] = [
       ['លេខកូដប្រតិបត្តិការ:', txCode],
