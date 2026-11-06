@@ -6,6 +6,10 @@
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>NSCameraUsageDescription</key>
+	<string>ABA Mobile uses the camera to scan KHQR / Bakong payment codes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose a KHQR image from your photos to pay or transfer.</string>
 	<key>CFBundleDisplayName</key>
         <string>ABA Mobile</string>
 	<key>CFBundleExecutable</key>
