@@ -189,7 +189,7 @@ export function addTxn(input: NewTxnInput): StoredTxn {
             { label: 'Original amount', value: `-${input.amount} ${input.currency}` },
             { label: 'Reference #', value: referenceNo() },
             { label: 'Remark', value: input.note?.trim() || 'Transfer' },
-            { label: 'Sender', value: input.fromName || input.name },
+            { label: 'Sender', value: `${input.fromName || input.name}${fromNo ? ` (${fromNo})` : ''}` },
             { label: 'To account', value: toAccountLine },
             { label: 'Transaction date', value: fmtDateTime(now) },
           ],
