@@ -285,8 +285,8 @@ const SuccessScreen = ({ data, amount, currency, payeeAmount, payeeCurrency, onD
   const details: [string, string][] = [
     ['លេខកូដប្រតិបត្តិការ:', txCode],
     ['Original amount:', payeeAmount && payeeCurrency && payeeCurrency !== currency
-      ? `${payeeCurrency === 'KHR' ? Number(payeeAmount).toLocaleString() + ' ៛' : '$' + Number(payeeAmount).toFixed(2)}`
-      : amt],
+      ? `-${payeeCurrency === 'KHR' ? Number(payeeAmount).toLocaleString() + ' ៛' : '$' + Number(payeeAmount).toFixed(2)}`
+      : `-${amt}`],
     ['Reference #:', ref],
     ['To account:', `${data.merchantName} (${toAccount})`],
     ['Transaction date:', dateStr],
