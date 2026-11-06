@@ -410,7 +410,7 @@ export default function TransactionDetail() {
               <TxAvatar avatar={avatar} size={52} />
               <div className="flex-1 min-w-0">
                 <p data-testid="receipt-amount" className="text-[24px] font-extrabold leading-tight tracking-tight text-gray-900">
-                  {absAmount} <span className="text-[16px] font-bold text-gray-500">{tx.currency === 'KHR' ? 'KHR' : 'USD'}</span>
+                  {tx.type === 'debit' ? '-' : ''}{absAmount} <span className="text-[16px] font-bold text-gray-500">{tx.currency === 'KHR' ? 'KHR' : 'USD'}</span>
                 </p>
                 <p className="text-[14px] font-semibold text-gray-500 mt-0.5 truncate">{description}</p>
               </div>
