@@ -16,6 +16,8 @@ import {
   RetroSuitcaseIcon, RetroTicketIcon,
 } from '@/components/home/RetroIcons';
 
+const promoImage = `${import.meta.env.BASE_URL}images/pickup-campaign.jpg`;
+
 const shortcuts = [
   { label: 'ផ្ទេរប្រាក់', english: 'Transfer', tint: 'mint', route: '/transfer', icon: Send },
   { label: 'ទូទាត់វិក្កយបត្រ', english: 'Pay bills', tint: 'peach', route: '/payments', icon: Receipt },
@@ -290,7 +292,7 @@ export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
             onClick={() => setLocation('/payments')}
             aria-label="Explore the vehicle offer"
             className="relative block h-[156px] w-full overflow-hidden rounded-[23px] border border-white/55 text-left shadow-[0_10px_24px_rgba(42,39,34,.22)] active:scale-[0.99] transition-transform"
-            style={{ background: '#a84136 url(/images/pickup-campaign.jpg) center / cover no-repeat' }}
+            style={{ background: `#a84136 url(${promoImage}) center / cover no-repeat` }}
           >
             <span className="absolute inset-0 bg-[linear-gradient(90deg,rgba(49,48,52,.66),rgba(49,48,52,.1)_70%),linear-gradient(0deg,rgba(29,37,39,.28),transparent_54%)]" />
             <span className="absolute left-[15px] top-[14px] z-[2] block max-w-[190px] text-[#fff8eb]">

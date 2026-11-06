@@ -1,3 +1,5 @@
+const image = (file: string) => `${import.meta.env.BASE_URL}images/${file}`;
+
 export interface ThemeConfig {
   id: string;
   khName: string;
@@ -16,7 +18,7 @@ export const THEMES: ThemeConfig[] = [
     id: 'sangkran',
     khName: 'មហាសង្ក្រាន្ត',
     enName: 'Maha Sangkran',
-    bgImage: '/images/theme-sangkran.jpg',
+    bgImage: `${image('theme-sangkran.jpg')}`,
     greetingKh: 'សួស្តី ឆ្នាំថ្មី!',
     greetingEn: 'Happy New Year!',
     balanceIllustration: 'lotus',
@@ -28,7 +30,7 @@ export const THEMES: ThemeConfig[] = [
     id: 'sixties',
     khName: 'ទសវត្សរ៍៦០',
     enName: 'The 60s Vintage',
-    bgImage: '/images/theme-60s.jpg',
+    bgImage: `${image('theme-60s.jpg')}`,
     greetingKh: 'សាយ័ណ្ហសួស្តី!',
     greetingEn: 'Good evening!',
     balanceIllustration: 'gramophone',
@@ -40,7 +42,7 @@ export const THEMES: ThemeConfig[] = [
     id: 'pchum_ben',
     khName: 'ភ្ជុំបិណ្ឌ',
     enName: 'Pchum Ben',
-    bgImage: '/images/theme-sangkran.jpg',
+    bgImage: `${image('theme-sangkran.jpg')}`,
     greetingKh: 'សូមអនុមោទនា!',
     greetingEn: 'Pchum Ben Blessings',
     balanceIllustration: 'lotus',
@@ -52,7 +54,7 @@ export const THEMES: ThemeConfig[] = [
     id: 'angkor',
     khName: 'សុវណ្ណភូមិ',
     enName: 'Suvarnabhumi',
-    bgImage: '/images/theme-angkor.jpg',
+    bgImage: `${image('theme-angkor.jpg')}`,
     greetingKh: 'សួស្តី ពេលព្រឹក!',
     greetingEn: 'Good morning!',
     balanceIllustration: 'angkor',
@@ -64,7 +66,7 @@ export const THEMES: ThemeConfig[] = [
     id: 'classic',
     khName: 'លំនាំដើម',
     enName: 'Classic Modern',
-    bgImage: '/images/khmer-street.jpg',
+    bgImage: `${image('khmer-street.jpg')}`,
     greetingKh: 'សួស្តី ពេលព្រឹក!',
     greetingEn: 'Good morning!',
     balanceIllustration: 'none',
