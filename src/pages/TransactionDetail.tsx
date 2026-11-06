@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Check, Share2, Download, MessageCircle, Clock, Upload } from 'lucide-react';
 import { useLocation, useParams } from 'wouter';
 import { getTxnDetail } from '../lib/txnStore';
+import { accounts, defaultAccount } from '../data/accounts';
+import { getBalance } from '../lib/balanceStore';
 
 type TxStatus = { label: string; time: string };
 
@@ -357,6 +359,13 @@ const ActionButton = ({ icon, title, subtitle }: { icon: React.ReactNode; title:
 export default function TransactionDetail() {
   const [, setLocation] = useLocation();
   const params = useParams<{ id: string; txId: string }>();
+  /* Peeking-through header must reflect the real account + its live balance
+     (the old hard-coded "20000.00" never matched the statement after a transfer). */
+  const acct = accounts.find((a) => a.id === params.id) ?? defaultAccount;
+  const liveBalance = Number(getBalance(acct.id, acct.balance ?? '0'));
+  const balanceLabel = acct.currency === 'KHR'
+    ? `${liveBalance.toLocaleString()} KHR`
+    : `${liveBalance.toFixed(2)} USD`;
   const tx = txDetails[params.txId] ?? getTxnDetail(params.txId) ?? getDefault(params.txId, params.id);
   const avatar = tx.avatar ?? { type: 'initials', color: '#6B7280', text: 'TX' };
 
@@ -370,8 +379,8 @@ export default function TransactionDetail() {
         {/* ── Light backdrop (account list peeking through) ── */}
         <div className="absolute inset-0 pointer-events-none bg-gray-50">
           <div className="px-5 pt-14">
-            <p className="text-gray-900 text-[18px] font-extrabold tracking-tight">qiang</p>
-            <p className="text-gray-500 text-[12px] font-semibold mt-0.5">150 614 168 | 20000.00 USD</p>
+            <p className="text-gray-900 text-[18px] font-extrabold tracking-tight">{acct.name}</p>
+            <p className="text-gray-500 text-[12px] font-semibold mt-0.5">{acct.number} | {balanceLabel}</p>
           </div>
         </div>
 
