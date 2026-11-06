@@ -355,8 +355,16 @@ export default function Scanner() {
   /* ── Camera ── */
   const startCamera = useCallback(async () => {
     try {
+      // 1920×1080 short side keeps a 3-4 m QR sharp, and continuous autofocus
+      // stops the camera hunting (the usual reason a QR takes ages to read).
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          // @ts-expect-error focusMode is not in the standard TS lib yet
+          advanced: [{ focusMode: 'continuous' }],
+        },
         audio: false,
       });
       streamRef.current = stream;
@@ -374,7 +382,7 @@ export default function Scanner() {
     const res = parseKHQRDetail(raw);
     if (res.ok) {
       scannedRef.current = true;
-      cancelAnimationFrame(rafRef.current);
+      stopLoop();
       setPulse(true);
       setTimeout(() => setPulse(false), 500);
       setLastRaw(raw);
@@ -387,7 +395,7 @@ export default function Scanner() {
     const lenData = len.data;
     if (lenData) {
       scannedRef.current = true;
-      cancelAnimationFrame(rafRef.current);
+      stopLoop();
       setPulse(true);
       setTimeout(() => setPulse(false), 500);
       setLastRaw(raw);
@@ -399,19 +407,80 @@ export default function Scanner() {
     else                              showToast('error', 'Unreadable QR code');
   }, []);
 
+  /* ── Decode loop ──
+     Two paths, both much faster than the old "jsQR the whole 1280×720 frame on
+     every animation frame":
+       1. Native BarcodeDetector (Chrome / Android WebView / iOS 17+) decodes the
+          <video> element directly — hardware assisted, sub-frame latency.
+       2. Fallback: jsQR on a 512×512 centre crop of the frame, once every ~90 ms,
+          with inversion attempts only every 4th pass (both roughly halve the work).
+     The scan box covers ~72% of the short side, which is where the user aims. */
+  const detectorRef = useRef<any>(null);
+  const frameRef = useRef(0);
+
+  useEffect(() => {
+    const BD = (window as any).BarcodeDetector;
+    if (!BD) return;
+    try {
+      BD.getSupportedFormats()
+        .then((formats: string[]) => {
+          if (formats.includes('qr_code')) detectorRef.current = new BD({ formats: ['qr_code'] });
+        })
+        .catch(() => { /* no detector — jsQR fallback stays */ });
+    } catch { /* unsupported constructor */ }
+  }, []);
+
   const tick = useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas || video.readyState !== video.HAVE_ENOUGH_DATA) {
-      rafRef.current = requestAnimationFrame(tick); return;
+    if (!video || !canvas || video.readyState < 2 || !video.videoWidth) {
+      rafRef.current = window.setTimeout(tick, 150); return;
     }
-    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-    ctx.drawImage(video, 0, 0);
-    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
-    if (code) { handleQRString(code.data); return; }
-    rafRef.current = requestAnimationFrame(tick);
+
+    const native = detectorRef.current;
+    if (native) {
+      native.detect(video)
+        .then((codes: any[]) => {
+          if (scannedRef.current) return;
+          const raw = codes?.[0]?.rawValue;
+          if (raw) { handleQRString(raw); return; }
+        })
+        .catch(() => { /* fall through to jsQR below */ });
+    }
+
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    const n = frameRef.current++;
+
+    // Every 5th pass reads the WHOLE frame (downscaled to 720 px) so a QR that
+    // is larger than the on-screen box — held too close to the camera — is
+    // still caught. Other passes only read the 512 px centre crop, which is
+    // what the user aims at and is ~4× cheaper to decode.
+    const fullFrame = n % 5 === 4;
+    canvas.width = 0;
+    if (fullFrame) {
+      const scale = Math.min(1, 720 / Math.max(vw, vh));
+      const w = Math.max(1, Math.round(vw * scale));
+      const h = Math.max(1, Math.round(vh * scale));
+      canvas.width = w; canvas.height = h;
+      const fctx = canvas.getContext('2d', { willReadFrequently: true })!;
+      fctx.drawImage(video, 0, 0, w, h);
+      const fimg = fctx.getImageData(0, 0, w, h);
+      const fcode = jsQR(fimg.data, w, h, { inversionAttempts: n % 10 === 9 ? 'attemptBoth' : 'dontInvert' });
+      if (fcode) { handleQRString(fcode.data); return; }
+    } else {
+      const side = Math.min(vw, vh) * 0.8;
+      const sx = (vw - side) / 2;
+      const sy = (vh - side) / 2;
+      const OUT = 512;
+      canvas.width = OUT; canvas.height = OUT;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+      ctx.drawImage(video, sx, sy, side, side, 0, 0, OUT, OUT);
+      const img = ctx.getImageData(0, 0, OUT, OUT);
+      const code = jsQR(img.data, OUT, OUT, { inversionAttempts: n % 8 === 0 ? 'attemptBoth' : 'dontInvert' });
+      if (code) { handleQRString(code.data); return; }
+    }
+    rafRef.current = window.setTimeout(tick, 80);
   }, [handleQRString]);
 
   /* ── Upload QR from gallery ── */
@@ -433,14 +502,14 @@ export default function Scanner() {
       if (code) {
         const res = parseKHQRDetail(code.data);
         if (res.ok) {
-          scannedRef.current = true; cancelAnimationFrame(rafRef.current);
+          scannedRef.current = true; stopLoop();
           setLastRaw(code.data); setResult({ data: res.data, verified: true });
         } else {
           // Failed verification → still surface readable info, flagged unverified.
           const len = parseKHQRLenient(code.data);
           const lenData = len.data;
           if (lenData) {
-            scannedRef.current = true; cancelAnimationFrame(rafRef.current);
+            scannedRef.current = true; stopLoop();
             setLastRaw(code.data); setResult({ data: lenData, verified: false, reason: res.reason });
           }
           else if (res.reason === 'not-bakong') showToast('error', 'QR is not a Bakong / KHQR code');
@@ -475,12 +544,13 @@ export default function Scanner() {
   const handleClose = () => {
     setResult(null);
     scannedRef.current = false;          // allow re-scan
-    rafRef.current = requestAnimationFrame(tick);
+    rafRef.current = window.setTimeout(tick, 60);
   };
 
   /* ── Lifecycle ── */
-  useEffect(() => { startCamera(); return () => { cancelAnimationFrame(rafRef.current); streamRef.current?.getTracks().forEach(t => t.stop()); }; }, [startCamera]);
-  useEffect(() => { if (cameraReady) rafRef.current = requestAnimationFrame(tick); return () => cancelAnimationFrame(rafRef.current); }, [cameraReady, tick]);
+  const stopLoop = () => { cancelAnimationFrame(rafRef.current); clearTimeout(rafRef.current); };
+  useEffect(() => { startCamera(); return () => { stopLoop(); streamRef.current?.getTracks().forEach(t => t.stop()); }; }, [startCamera]);
+  useEffect(() => { if (cameraReady) rafRef.current = window.setTimeout(tick, 60); return () => { stopLoop(); clearTimeout(rafRef.current); }; }, [cameraReady, tick]);
 
   return (
     <div className="min-h-[100dvh] bg-black font-sans select-none flex flex-col relative overflow-hidden">
