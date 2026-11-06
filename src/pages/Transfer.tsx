@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, CheckCircle2, Check, Cloud, ChevronDown, Delete, Share2, RotateCcw, FileDown, History, MessageCircle, Star } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Check, Cloud, ChevronDown, Delete, Share2, RotateCcw, FileDown, History, MessageCircle, Star, Wallet, User, Pencil, Gift, Bookmark } from 'lucide-react';
 import pinLockLogo from '@/assets/pin-lock-logo.png';
 import { useLocation } from 'wouter';
 import { getPendingTransfer, clearPendingTransfer } from '@/lib/transferState';
@@ -29,6 +29,26 @@ const MOCK_PAYMENT_PIN = '888000';
             key — the current sandbox key expired 2026-04-04 — or the Bakong
             app-confirmation flow). */
 const USE_REAL_PAYMENT = false;
+
+/* ─── Small UI atoms for the ABA internal-transfer form ────────────────────── */
+const UsFlagChip = () => (
+  <span className="relative w-[24px] h-[16px] rounded-[3px] overflow-hidden border border-gray-200 shrink-0">
+    <span className="absolute inset-0" style={{ background: 'repeating-linear-gradient(180deg,#B22234 0 2px,#fff 2px 4px)' }} />
+    <span className="absolute left-0 top-0 w-[10px] h-[9px] bg-[#3C3B6E]" />
+  </span>
+);
+
+const ToggleSwitch = ({ on, onToggle, label }: { on: boolean; onToggle: () => void; label: string }) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    aria-label={label}
+    aria-pressed={on}
+    className={`relative w-[52px] h-[31px] rounded-full transition-colors shrink-0 ${on ? 'bg-[#00A67E]' : 'bg-[#C9C9C9]'}`}
+  >
+    <span className={`absolute top-[3px] w-[25px] h-[25px] rounded-full bg-white shadow-sm transition-all ${on ? 'left-[24px]' : 'left-[3px]'}`} />
+  </button>
+);
 
 /* ─── Built-in ABA account book: when the user types a recipient ABA account
    number, we resolve the recipient name (and currency) shown under the input.
@@ -935,7 +955,7 @@ export default function Transfer() {
       <div className="w-full h-full md:max-w-[390px] md:h-[844px] bg-[#F5F5F7] md:rounded-[2.5rem] shadow-2xl relative overflow-hidden md:border-[8px] border-black flex flex-col">
 
         {/* ── Header ── */}
-        <div className="bg-white px-4 pt-12 pb-4 shrink-0 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+        <div className={isABAInternal ? 'hidden' : 'bg-white px-4 pt-12 pb-4 shrink-0 shadow-[0_1px_0_rgba(0,0,0,0.06)]'}>
           <div className="flex items-center gap-3 mb-1">
             <button onClick={() => setLocation('/transfer')} className="text-gray-700 hover:text-gray-900 transition-colors">
               <ArrowLeft className="w-6 h-6" strokeWidth={2.5} />
@@ -960,219 +980,152 @@ export default function Transfer() {
 
         <div className="flex-1 overflow-y-auto flex flex-col">
           {isABAInternal ? (
-            <div className="px-4 pt-4">
-
-              {/* Banner: ABA logo + subtitle */}
-              <div className="bg-white rounded-2xl px-4 py-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] flex items-center gap-3">
-                <span className="w-12 h-12 rounded-xl bg-[#E8002D] text-white text-[13px] font-black flex items-center justify-center shrink-0 shadow-sm">ABA</span>
-                <p className="text-[13.5px] font-bold text-gray-800 leading-snug">ផ្ទេរទៅគណនី ABA ណាមួយ</p>
-              </div>
-
-              {/* Choose pay currency (USD / KHR) — switches the pay-from account */}
-              <div
-                onClick={() => {
-                  const next = accountId === '1' ? '5' : '1';
-                  const acct = accounts.find((a) => a.id === next)!;
-                  setAccountId(next);
-                  setCurrency(acct.currency as 'USD' | 'KHR');
-                  setAmount('');
-                  setError('');
-                }}
-                className="mt-3 w-full bg-white rounded-2xl px-4 py-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] flex items-center justify-between text-left active:bg-gray-50 cursor-pointer"
-              >
-                <div className="min-w-0">
-                  <p className="text-[11px] font-bold text-gray-400">ជ្រើសរើសគណនីរបស់អ្នក · រូបិយប័ណ្ណទូទាត់</p>
-                  <p className="text-[15px] font-extrabold text-gray-900 mt-1 truncate">
-                    {selectedAccount.name}: {currency === 'KHR'
-                      ? Number(getBalance(selectedAccount.id, selectedAccount.balance ?? '0')).toLocaleString() + ' ៛'
-                      : '$' + Number(getBalance(selectedAccount.id, selectedAccount.balance ?? '0')).toFixed(2)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex rounded-xl bg-gray-100 p-0.5" role="group" aria-label="Pay currency">
-                    <button
-                      onClick={() => {
-                        if (currency !== 'USD') {
-                          const acct = accounts.find((a) => a.id === '1')!;
-                          setAccountId(acct.id);
-                          setCurrency('USD');
-                          setAmount('');
-                          setError('');
-                        }
-                      }}
-                      className={`px-3 py-1.5 rounded-[10px] text-[12px] font-extrabold transition-colors ${currency === 'USD' ? 'bg-white text-[#1A1F71] shadow-sm' : 'text-gray-500'}`}
-                    >
-                      USD
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (currency !== 'KHR') {
-                          const acct = accounts.find((a) => a.id === '5')!;
-                          setAccountId(acct.id);
-                          setCurrency('KHR');
-                          setAmount('');
-                          setError('');
-                        }
-                      }}
-                      className={`px-3 py-1.5 rounded-[10px] text-[12px] font-extrabold transition-colors ${currency === 'KHR' ? 'bg-white text-[#C8102E] shadow-sm' : 'text-gray-500'}`}
-                    >
-                      KHR
-                    </button>
-                  </div>
-                  <ChevronDown className="w-4 h-4 text-gray-400" strokeWidth={2.5} />
-                </div>
-              </div>
-
-              {/* Recipient account number */}
-              <div className="mt-3 bg-white rounded-2xl px-4 py-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-                <p className="text-[11px] font-bold text-gray-400">ដាក់លេខគណនីទទួល</p>
-                <input
-                  value={toAccount}
-                  onChange={(e) => setToAccount(e.target.value.replace(/[^\d\s]/g, '').slice(0, 15))}
-                  placeholder="000 000 000"
-                  inputMode="numeric"
-                  className="mt-1 w-full text-[16px] font-extrabold text-gray-900 placeholder-gray-300 bg-transparent outline-none tracking-wide"
+            <div className="flex flex-col">
+              {/* ── Hero: ABA wordmark over a teal-toned Angkor backdrop ── */}
+              <div className="relative shrink-0 h-[292px]">
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    backgroundImage: `linear-gradient(180deg, rgba(24,50,46,.74) 0%, rgba(16,34,32,.9) 100%), url(${import.meta.env.BASE_URL}images/theme-angkor.jpg)`,
+                  }}
                 />
-              </div>
+                <div className="relative flex flex-col h-full">
+                  <div className="flex items-center gap-3 px-4 pt-12">
+                    <button onClick={() => setLocation('/transfer')} aria-label="back" className="text-white/90 active:opacity-70">
+                      <ArrowLeft className="w-6 h-6" strokeWidth={2.5} />
+                    </button>
+                    <div className="flex items-center">
+                      <span className="text-[19px] font-extrabold tracking-tight text-white leading-none">ABA</span>
+                      <span className="text-[#F26A6A] text-[10px] font-black leading-none -mt-2">'</span>
+                      <span className="text-[16px] font-extrabold text-white leading-none ml-2">ផ្ទេរប្រាក់</span>
+                    </div>
+                  </div>
 
-              {/* Recipient verification */}
-              <div className={`mt-3 bg-white rounded-2xl px-4 py-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] flex items-center gap-3 ${recipient ? '' : 'opacity-70'}`}>
-                <span
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-white font-extrabold text-[14px] shrink-0"
-                  style={recipient ? { backgroundColor: recipient.bankColor } : { backgroundColor: '#9CA3AF' }}
-                >
-                  {recipient ? recipient.merchantName.split(' ').map(n => n[0]).join('').slice(0, 2) : '?'}
-                </span>
-                <div className="flex-1 min-w-0">
-                  {recipient ? (
-                    <>
-                      <p className="text-[14px] font-extrabold text-gray-900 truncate">{recipient.merchantName}</p>
-                      <p className="text-[11px] text-gray-400 font-semibold truncate">{toAccount || recipient.bakongId}</p>
-                    </>
-                  ) : bkCheck === 'ok' ? (
-                    <>
-                      <p className="text-[14px] font-extrabold text-gray-900 truncate">ABA Account Holder</p>
-                      <p className="text-[11px] text-gray-400 font-semibold truncate">{toAccount}</p>
-                    </>
-                  ) : bkCheck === 'missing' ? (
-                    <>
-                      <p className="text-[14px] font-extrabold text-[#E8002D] truncate">账户不存在</p>
-                      <p className="text-[11px] text-gray-400 font-semibold truncate">{toAccount}</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-[14px] font-extrabold text-gray-400 truncate">មិនទាន់ផ្ទៀងផ្ទាត់</p>
-                      <p className="text-[11px] text-gray-400 font-semibold truncate">{toAccount || 'លេខគណនី ABA ណាមួយ'}</p>
-                    </>
-                  )}
+                  <div className="flex-1 flex flex-col items-center justify-center gap-3.5 pb-5">
+                    <div className="w-[106px] h-[106px] rounded-full border border-white/25 bg-white/12 backdrop-blur-md flex items-center justify-center shadow-[0_10px_28px_rgba(0,0,0,0.2)]">
+                      <span className="text-[23px] font-black tracking-tight text-[#E8DAC0]">ABA<span className="text-[#F26A6A] text-[11px] align-super">'</span></span>
+                    </div>
+                    <p className="text-[16px] font-extrabold text-white">ផ្ទេរទៅគណនី ABA ណាមួយ</p>
+                  </div>
                 </div>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${payeeCurrency === 'USD' ? 'bg-[#1A1F71]/10 text-[#1A1F71]' : 'bg-[#C8102E]/10 text-[#C8102E]'}`}>
-                  {payeeCurrency}
-                </span>
-                {bkCheck === 'checking' && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 bg-gray-100 text-gray-500">验证中…</span>
-                )}
-                {bkCheck === 'ok' && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 bg-[#00A67E]/10 text-[#00A67E]">✓ 已验证</span>
-                )}
-                {bkCheck === 'missing' && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 bg-[#E8002D]/10 text-[#E8002D]">账户不存在</span>
-                )}
-                {bkCheck === 'offline' && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 bg-gray-100 text-gray-500">离线校验</span>
-                )}
               </div>
 
-              {/* Amount */}
-              <div className="mt-3 bg-white rounded-2xl px-5 py-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">ចំនួនទឹកប្រាក់</p>
+              {/* ── White form sheet ── */}
+              <div className="relative -mt-6 bg-white rounded-t-[28px] px-4 pt-6 pb-6">
+                {/* Your account + pay currency */}
+                <div className="relative">
+                  <span className="absolute -top-[9px] left-4 bg-white px-1.5 text-[11px] font-semibold text-gray-500">ជ្រើសរើសគណនីរបស់អ្នក</span>
+                  <div
+                    onClick={() => {
+                      const next = accountId === '1' ? '5' : '1';
+                      const acct = accounts.find((a) => a.id === next)!;
+                      setAccountId(next);
+                      setCurrency(acct.currency as 'USD' | 'KHR');
+                      setAmount('');
+                      setError('');
+                    }}
+                    role="button"
+                    className="border border-gray-200 rounded-2xl px-4 py-3.5 flex items-center gap-3 cursor-pointer active:bg-gray-50"
+                  >
+                    <Wallet className="w-[22px] h-[22px] text-gray-400 shrink-0" strokeWidth={1.8} />
+                    <p className="flex-1 min-w-0 text-[15.5px] font-extrabold text-[#0B5D8C] truncate">
+                      W: {currency === 'KHR'
+                        ? Number(getBalance(selectedAccount.id, selectedAccount.balance ?? '0')).toLocaleString() + ' KHR'
+                        : Number(getBalance(selectedAccount.id, selectedAccount.balance ?? '0')).toFixed(2) + ' USD'}
+                    </p>
+                    <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" strokeWidth={2.4} />
+                  </div>
+                </div>
+
+                {/* Recipient account number */}
+                <div className="mt-4 border border-gray-200 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+                  <User className="w-[22px] h-[22px] text-gray-400 shrink-0" strokeWidth={1.8} />
+                  <input
+                    value={toAccount}
+                    onChange={(e) => {
+                      setToAccount(e.target.value.replace(/[^\d\s]/g, '').slice(0, 15));
+                      setError('');
+                    }}
+                    placeholder="ដាក់លេខគណនីទទួល"
+                    inputMode="numeric"
+                    className="flex-1 min-w-0 bg-transparent outline-none text-[15.5px] font-bold text-gray-800 placeholder:font-semibold placeholder:text-gray-400"
+                  />
+                  <span className="h-7 w-px bg-gray-200 shrink-0" />
+                  <span
+                    className="w-[26px] h-[30px] rounded-[5px] shrink-0 flex items-center justify-center"
+                    style={{ background: 'linear-gradient(150deg,#E8002D 0%,#E8002D 42%,#0E6E8B 100%)' }}
+                  >
+                    <span className="text-white text-[12px] leading-none">★</span>
+                  </span>
+                </div>
+                {(recipient || bkCheck === 'missing') && (
+                  <p className={`mt-1.5 px-1 text-[11.5px] font-semibold ${bkCheck === 'missing' ? 'text-[#E8002D]' : 'text-gray-400'}`}>
+                    {recipient ? `${recipient.merchantName} · ${payeeCurrency}` : 'គណនីមិនមាន ឬមិនទាន់បានចុះឈ្មោះ'}
+                  </p>
+                )}
+
+                {/* Amount */}
+                <div className="mt-4 border border-gray-200 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+                  <UsFlagChip />
+                  <input
+                    value={amount}
+                    onChange={(e) => {
+                      const clean = e.target.value.replace(/[^\d.]/g, '');
+                      const [int, dec] = clean.split('.');
+                      const next = dec !== undefined ? `${int}.${dec.slice(0, 2)}` : int;
+                      setAmount(next.slice(0, 12));
+                      setError('');
+                    }}
+                    placeholder="ចំនួនទឹកប្រាក់"
+                    inputMode="decimal"
+                    className="flex-1 min-w-0 bg-transparent outline-none text-[15.5px] font-bold text-gray-800 placeholder:font-semibold placeholder:text-gray-400"
+                  />
                   <button
                     type="button"
                     onClick={() => { setPayeeCur(p => (p === 'USD' ? 'KHR' : 'USD')); setAmount(''); setError(''); }}
-                    aria-label={`切换支付币种为 ${payeeCurrency === 'USD' ? 'KHR' : 'USD'}`}
-                    className={`flex items-center gap-1 px-3 py-1 rounded-full border text-[12px] font-bold active:scale-95 transition-all ${payeeCurrency === 'USD' ? 'border-[#1A1F71] text-[#1A1F71]' : 'border-[#C8102E] text-[#C8102E]'}`}
+                    aria-label={`切换币种为 ${payeeCurrency === 'USD' ? 'KHR' : 'USD'}`}
+                    className="text-[13px] font-extrabold text-gray-400 shrink-0"
                   >
                     {payeeCurrency}
-                    <ChevronDown className="w-3 h-3" strokeWidth={2.5} />
                   </button>
                 </div>
-                <div className="flex items-end justify-center gap-1 min-h-[52px]">
-                  <span className="text-[40px] font-extrabold text-gray-900 leading-none tracking-tight">{formatted()}</span>
+                {error && <p className="text-[11.5px] text-[#E8002D] font-semibold mt-2 px-1">{error}</p>}
+
+                {/* Remark */}
+                <div className="mt-4 border border-gray-200 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+                  <Pencil className="w-[20px] h-[20px] text-gray-400 shrink-0" strokeWidth={1.8} />
+                  <input
+                    ref={noteRef}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="ចំណាំ (មិនដាក់ក៏បាន)"
+                    className="flex-1 min-w-0 bg-transparent outline-none text-[14px] font-semibold text-gray-800 placeholder:text-gray-400"
+                  />
                 </div>
 
-                {/* FX conversion — convert the payee/order amount into the
-                    selected account currency (e.g. 28,800 KHR order → ≈ $7.11 USD) */}
-                {!!amount && parseFloat(amount) > 0 && currency !== payeeCurrency && (
-                  <div className="mt-2 text-center">
-                    <p className="text-[12px] font-bold text-[#00A67E]">
-                      ≈ {currency === 'USD'
-                        ? `$${(parseFloat(amount) / EXCHANGE_RATE).toFixed(2)}`
-                        : `${(parseFloat(amount) * EXCHANGE_RATE).toLocaleString('en-US')} ៛`}
-                      <span className="text-[10.5px] text-gray-400 font-semibold ml-1.5">
-                        {currency === 'USD' ? '等值美金' : '等值KHR'}（1 USD = 4,050 KHR）
-                      </span>
-                    </p>
+                {/* Toggles */}
+                <div className="mt-7 space-y-5">
+                  <div className="flex items-center gap-3.5">
+                    <Bookmark className="w-[22px] h-[22px] text-gray-400 shrink-0" strokeWidth={1.8} />
+                    <p className="flex-1 text-[14px] font-bold text-gray-700">បង្កើត គំរូទូទាត់ប្រចាំ</p>
+                    <ToggleSwitch on={saveTemplate} onToggle={() => setSaveTemplate(s => !s)} label="save template" />
                   </div>
-                )}
+                  <div className="flex items-center gap-3.5">
+                    <Gift className="w-[22px] h-[22px] text-gray-400 shrink-0" strokeWidth={1.8} />
+                    <p className="flex-1 text-[14px] font-bold text-gray-700">ផ្ញើជាកាដូ</p>
+                    <ToggleSwitch on={sendAsGift} onToggle={() => setSendAsGift(s => !s)} label="send as gift" />
+                  </div>
+                </div>
 
-                {error && (
-                  <p className="text-[11px] text-[#E8002D] font-semibold text-center mt-2">{error}</p>
-                )}
-
-              </div>
-
-              {/* Note */}
-              <div className="mt-3 bg-white rounded-2xl px-4 py-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-                <p className="text-[11px] font-bold text-gray-400">ចំណាំ (មិនដាក់ក៏បាន)</p>
-                <input
-                  ref={noteRef}
-                  value={note}
-                  onChange={e => setNote(e.target.value)}
-                  placeholder="បញ្ចូលកំណត់ចំណាំ..."
-                  className="mt-1 w-full text-[14px] font-semibold text-gray-800 placeholder-gray-300 bg-transparent outline-none"
-                />
-              </div>
-
-              {/* Save template toggle */}
-              <div className="mt-3 bg-white rounded-2xl px-4 py-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] flex items-center justify-between">
-                <p className="text-[13.5px] font-bold text-gray-800 leading-snug">បង្កើត គំរូទូទាត់ប្រចាំ</p>
-                <button
-                  onClick={() => setSaveTemplate(s => !s)}
-                  aria-label="Toggle save template"
-                  className={`w-12 h-7 rounded-full transition-colors relative ${saveTemplate ? 'bg-[#00A67E]' : 'bg-gray-300'}`}
-                >
-                  <span className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${saveTemplate ? 'left-6' : 'left-1'}`} />
-                </button>
-              </div>
-
-              {/* Send as gift toggle */}
-              <div className="mt-3 bg-white rounded-2xl px-4 py-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] flex items-center justify-between">
-                <p className="text-[13.5px] font-bold text-gray-800 leading-snug">ផ្ញើជាកាដូ</p>
-                <button
-                  onClick={() => setSendAsGift(s => !s)}
-                  aria-label="Toggle send as gift"
-                  className={`w-12 h-7 rounded-full transition-colors relative ${sendAsGift ? 'bg-[#00A67E]' : 'bg-gray-300'}`}
-                >
-                  <span className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${sendAsGift ? 'left-6' : 'left-1'}`} />
-                </button>
-              </div>
-
-              {/* Numpad */}
-              <div className="mt-3 bg-white rounded-2xl px-3 py-2 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-                <NumPad onKey={handleKey} />
-              </div>
-
-              {/* Transfer button (grey until complete) */}
-              <div className="mt-3 mb-4">
+                {/* Submit */}
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={handleConfirm}
                   disabled={!amount || !recipient}
-                  className={`w-full py-4 rounded-2xl font-extrabold text-[16px] transition-colors ${
+                  className={`mt-7 w-full py-4 rounded-[28px] font-extrabold text-[16px] transition-colors ${
                     amount && recipient
-                      ? 'bg-[#E8002D] text-white shadow-[0_4px_16px_rgba(232,0,45,0.3)]'
-                      : 'bg-gray-300 text-gray-500'
+                      ? 'bg-[#E8002D] text-white shadow-[0_6px_20px_rgba(232,0,45,0.3)]'
+                      : 'bg-[#C9C9C9] text-white/90'
                   }`}
                 >
                   ផ្ទេរ
