@@ -531,7 +531,9 @@ export default function PayFlow() {
             bankColor,
   bankCode,
             bakongId: payeeAccount,
-            accountNumber: accounts[fromIdx % accounts.length].number,
+            accountNumber: payeeAccount.split('@')[0],
+            fromAccountNumber: accounts[fromIdx % accounts.length].number,
+            fromName: accounts[fromIdx % accounts.length].name,
             note: note || undefined,
           });
           deductBalance(accounts[fromIdx % accounts.length].id, Number(amountStr || '0.01'));

@@ -739,6 +739,8 @@ export default function Transfer() {
       bankColor: d.bankColor,
       bakongId: d.bakongId,
       accountNumber: d.accountNumber,
+      fromAccountNumber: selectedAccount.number,
+      fromName: selectedAccount.name,
       note: note.trim() || undefined,
     });
     setPinStep(false);

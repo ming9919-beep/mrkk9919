@@ -109,6 +109,9 @@ export type NewTxnInput = {
   bankColor: string;
   bakongId: string;
   accountNumber: string;
+  /** Payer (my) account — shown as "From account" on the receipt. */
+  fromAccountNumber?: string;
+  fromName?: string;
   note?: string;
 };
 
@@ -119,6 +122,18 @@ function recipientAccountOnly(input: NewTxnInput): string {
   if (!digits) return (input.accountNumber || input.bakongId || '').split('@')[0];
   // 9-digit ABA accounts read as 3-3-3, matching the input field formatting.
   return digits.length === 9 ? `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}` : digits;
+}
+
+/** "015 277 736" style formatting for a raw account number. */
+function spacedAccount(acc?: string): string {
+  const digits = (acc || '').split('@')[0].replace(/[^0-9]/g, '');
+  if (!digits) return '';
+  return digits.length === 9 ? `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}` : digits;
+}
+
+/** Bakong-style reference number, e.g. "100FT38375080082". */
+function referenceNo(): string {
+  return '100FT' + String(Math.floor(10000000000 + Math.random() * 89999999999)).slice(-11);
 }
 
 /** Append a completed transfer to the statement; returns the stored row. */
@@ -155,6 +170,11 @@ export function addTxn(input: NewTxnInput): StoredTxn {
   const hash = Array.from({ length: 8 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
   const tlTime = `${fmtDateHead(now)} | ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
+  // ABA → ABA receipt mirrors the real app's internal-transfer layout:
+  // Trx. ID / From account / Original amount / Reference # / Remark / Sender /
+  // To account / Transaction date.
+  const fromNo = spacedAccount(input.fromAccountNumber);
+  const toAccountLine = `${input.name}${accountOnly ? ` (${accountOnly})` : ''}`;
   const detail: TxDetail = {
     amount: row.amount,
     currency: input.deductCurrency ?? input.currency,
@@ -165,14 +185,13 @@ export function addTxn(input: NewTxnInput): StoredTxn {
       ? {
           fields: [
             { label: 'Trx. ID', value: trxId },
-            { label: 'Authorization Code', value: `APV-${String(Math.floor(100000 + Math.random() * 900000))}` },
-            { label: 'Cambodia time', value: fmtCambodiaTime(now) },
-            { label: 'Recipient', value: input.name },
-            { label: 'Bank', value: input.bankName },
-            { label: 'Recipient account', value: accountOnly },
+            ...(fromNo ? [{ label: 'From account', value: fromNo }] : []),
             { label: 'Original amount', value: `-${input.amount} ${input.currency}` },
-            { label: 'Transfer type', value: 'ABA to ABA' },
-            ...(input.note ? [{ label: 'Note', value: input.note }] : []),
+            { label: 'Reference #', value: referenceNo() },
+            { label: 'Remark', value: input.note?.trim() || 'Transfer' },
+            { label: 'Sender', value: input.fromName || input.name },
+            { label: 'To account', value: toAccountLine },
+            { label: 'Transaction date', value: fmtDateTime(now) },
           ],
         }
       : {
