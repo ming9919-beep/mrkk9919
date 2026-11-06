@@ -24,3 +24,8 @@ coverage
 Thumbs.db
 .cache/
 .local/
+
+# iOS build artifacts
+*.ipa
+*.xcarchive
+ios/App/App/App.xcodeproj/project.xcworkspace/xcuserdata

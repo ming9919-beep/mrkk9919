@@ -10,9 +10,15 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:ios": "PORT=5173 BASE_PATH=./ vite build --config vite.config.ts && cap sync ios",
+    "ios:open": "cap open ios",
+    "ios:sync": "cap sync ios"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/ios": "^8.6.0",
     "@hookform/resolvers": "^3.10.0",
     "@playwright/test": "^1.63.0",
     "@radix-ui/react-accordion": "^1.2.4",
