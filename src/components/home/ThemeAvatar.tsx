@@ -11,7 +11,7 @@ export const ThemeAvatar: React.FC<ThemeAvatarProps> = ({ themeId, onClick }) =>
       <div
         onClick={onClick}
         className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/90 shadow-md bg-[#e3dcc8] flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
-        title="Change Theme & Profile"
+        title="My profile"
       >
         {/* Tom-inspired retro cartoon cat SVG with sailor/newsboy cap */}
         <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -70,7 +70,7 @@ export const ThemeAvatar: React.FC<ThemeAvatarProps> = ({ themeId, onClick }) =>
       onClick={onClick}
       className="grid h-12 w-12 cursor-pointer place-items-center rounded-full border-2 border-[#fff8e6]/85 bg-[radial-gradient(circle_at_35%_28%,#f0d88a_0_26%,#c98066_27%_48%,#385c5d_49%)] text-[16px] font-bold text-[#675344] shadow-[0_3px_10px_#292a2540] transition-transform active:scale-95"
       aria-hidden="true"
-      title="Change Theme & Profile"
+      title="My profile"
     >
       Y
     </div>

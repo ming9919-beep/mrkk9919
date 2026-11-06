@@ -130,7 +130,7 @@ export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
 
         {/* Profile */}
         <header className="mb-4 mt-[19px] flex items-center gap-3 px-1.5 text-[#fff9e9]">
-          <ThemeAvatar themeId={theme.id} onClick={() => setThemeOpen(true)} />
+          <ThemeAvatar themeId={theme.id} onClick={() => setLocation('/settings/profile')} />
           <button type="button" onClick={() => setLocation('/settings/profile')} className="flex flex-col items-start text-left">
             <span className="text-[12px] leading-relaxed opacity-95">{theme.greetingKh}</span>
             <span className="text-[19px] font-bold leading-tight tracking-wide">Yukheang</span>
