@@ -1,0 +1,32 @@
+# Render.com blueprint — static site for the ABA001 demo.
+#
+# Deploy: Render dashboard → New → Blueprint → pick mrkk9919/ABA001 → Apply.
+# It builds with BASE_PATH=/ (root hosting, unlike the /ABA001/ GitHub Pages
+# build) and serves the SPA from dist/public with a catch-all rewrite so deep
+# routes like /accounts or /transfer/send work.
+services:
+  - type: web
+    name: aba001
+    runtime: static
+    buildCommand: corepack enable && pnpm install --no-frozen-lockfile && PORT=5173 BASE_PATH=/ pnpm build
+    staticPublishPath: ./dist/public
+    envVars:
+      - key: NODE_VERSION
+        value: 22.23.2
+      - key: PORT
+        value: "5173"
+      - key: BASE_PATH
+        value: /
+    routes:
+      # SPA fallback: every non-file path returns index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      # Vite emits hashed filenames — safe to cache forever
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /icons/*
+        name: Cache-Control
+        value: public, max-age=604800
