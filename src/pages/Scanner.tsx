@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import jsQR from 'jsqr';
-import { parseKHQRDetail, parseKHQRLenient, DEMO_KHQR, type KHQRData } from '@/lib/khqr';
+import { parseKHQRDetail, parseKHQRLenient, type KHQRData } from '@/lib/khqr';
 import { setPendingTransfer } from '@/lib/transferState';
 import BankLogo from '@/components/BankLogo';
 import { getBakongStatus, checkBakongAccount, type BakongStatus, type BakongAccountCheck } from '@/lib/bakongClient';
@@ -330,9 +330,6 @@ const Toast = ({ type, msg }: { type: 'success' | 'error'; msg: string }) => (
   </motion.div>
 );
 
-/* ─── Demo cycle index (rotates through DEMO_KHQR) ─────────────────────────── */
-let demoIdx = 0;
-
 /* ─── Main page ─────────────────────────────────────────────────────────────── */
 export default function Scanner() {
   const [, setLocation] = useLocation();
@@ -457,19 +454,6 @@ export default function Scanner() {
     img.src = url;
   };
 
-  /* ── Demo scan (cycles through the Bakong demo accounts) ── */
-  const handleDemo = () => {
-    const entry = DEMO_KHQR[demoIdx % DEMO_KHQR.length];
-    demoIdx++;
-    setPulse(true); setTimeout(() => setPulse(false), 500);
-    const res = parseKHQRDetail(entry.qr);
-    if (res.ok) {
-      scannedRef.current = true; cancelAnimationFrame(rafRef.current);
-      setLastRaw(entry.qr);
-      setResult({ data: res.data, verified: true });
-      showToast('success', `Demo: ${entry.label.split('–')[0].trim()}`, 1500);
-    }
-  };
 
   /* ── Torch ── */
   const toggleTorch = async () => {
@@ -591,16 +575,6 @@ export default function Scanner() {
           </div>
 
           <PaymentLogos />
-          {/* Demo / test scan button — cycles through real Bakong demo recipients
-              so the scan→recipient→transfer flow can be verified without a camera. */}
-          <div className="flex justify-center pt-1">
-            <button
-              onClick={handleDemo}
-              className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-white/60 text-[11px] font-bold hover:bg-white/20 active:scale-95 transition-all"
-            >
-              សាកល្បងស្កែន · Demo
-            </button>
-          </div>
         </div>
 
         {/* ── Result sheet ── */}
