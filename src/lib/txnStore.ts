@@ -112,6 +112,15 @@ export type NewTxnInput = {
   note?: string;
 };
 
+/** Recipient account shown on the receipt: the account number only
+   ("015 277 736"), never the Bakong handle ("015277736@ababank"). */
+function recipientAccountOnly(input: NewTxnInput): string {
+  const digits = (input.accountNumber || input.bakongId || '').split('@')[0].replace(/[^0-9]/g, '');
+  if (!digits) return (input.accountNumber || input.bakongId || '').split('@')[0];
+  // 9-digit ABA accounts read as 3-3-3, matching the input field formatting.
+  return digits.length === 9 ? `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}` : digits;
+}
+
 /** Append a completed transfer to the statement; returns the stored row. */
 export function addTxn(input: NewTxnInput): StoredTxn {
   const s = store();
@@ -142,6 +151,7 @@ export function addTxn(input: NewTxnInput): StoredTxn {
   //  - ABA account → ABA "ABA to ABA" receipt (no timeline, APV/RRN fields)
   //  - other banks  → Bakong cross-bank receipt (timeline + hash/reference)
   const isABA = input.bankName === 'ABA Bank';
+  const accountOnly = recipientAccountOnly(input);
   const hash = Array.from({ length: 8 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
   const tlTime = `${fmtDateHead(now)} | ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
@@ -159,7 +169,7 @@ export function addTxn(input: NewTxnInput): StoredTxn {
             { label: 'Cambodia time', value: fmtCambodiaTime(now) },
             { label: 'Recipient', value: input.name },
             { label: 'Bank', value: input.bankName },
-            { label: 'Recipient account', value: input.bakongId },
+            { label: 'Recipient account', value: accountOnly },
             { label: 'Original amount', value: `${input.amount} ${input.currency}` },
             { label: 'Transfer type', value: 'ABA to ABA' },
             ...(input.note ? [{ label: 'Note', value: input.note }] : []),
@@ -175,7 +185,7 @@ export function addTxn(input: NewTxnInput): StoredTxn {
             { label: 'Trx. ID', value: trxId },
             { label: 'Bakong hash #', value: hash },
             { label: 'Bank', value: input.bankName },
-            { label: 'Recipient account', value: input.bakongId },
+            { label: 'Recipient account', value: accountOnly },
             { label: 'Original amount', value: `${input.amount} ${input.currency}` },
             { label: 'Transaction date', value: fmtDateTime(now) },
           ],
