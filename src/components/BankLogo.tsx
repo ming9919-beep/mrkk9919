@@ -27,6 +27,13 @@ export function hasRealLogo(bankCode?: string): boolean {
   return !!bankCode && !!REAL_LOGOS[bankCode.toLowerCase()];
 }
 
+/** Public URL of the bank's real logo image, resolved against the deploy base path. */
+export function getRealLogoUrl(bankCode?: string): string | undefined {
+  if (!bankCode) return undefined;
+  const file = REAL_LOGOS[bankCode.toLowerCase()];
+  return file ? `${import.meta.env.BASE_URL}${file}` : undefined;
+}
+
 /**
  * Bank brand logo chip — SVG gradient tile with the bank's wordmark.
  * Unknown codes fall back to a neutral tile and the raw code, so every
@@ -67,11 +74,11 @@ const BankLogo = ({
   const gid = `banklogo-${info.short}-${dim}`;
 
   // Real logo image (if available for this bank)
-  const realLogo = bankCode ? REAL_LOGOS[bankCode.toLowerCase()] : undefined;
+  const realLogo = getRealLogoUrl(bankCode);
   if (realLogo) {
     const img = (
       <img
-        src={`${import.meta.env.BASE_URL}${realLogo}`}
+        src={realLogo}
         alt={bankName}
         width={dim}
         height={dim}

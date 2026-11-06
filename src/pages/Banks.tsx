@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation } from 'wouter';
 import { ArrowLeft, Landmark } from 'lucide-react';
 import { BANK_MAP } from '@/lib/khqr';
+import { getRealLogoUrl } from '@/components/BankLogo';
 
 /* All Cambodia banks — logo grid (brand colour tile + wordmark). */
 
@@ -67,12 +68,21 @@ export default function Banks() {
             const fs = Math.min(10, Math.max(6, Math.floor((48 * 0.82) / (wm.length * 0.62))));
             return (
             <div key={code} className="rounded-2xl bg-white shadow-[0_2px_10px_rgba(0,0,0,0.05)] px-3 py-4 flex flex-col items-center gap-2 text-center">
-              <span
-                className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black tracking-tight shadow-sm"
-                style={{ backgroundColor: b.color, fontSize: fs }}
-              >
-                {wm}
-              </span>
+              {getRealLogoUrl(code) ? (
+                <img
+                  src={getRealLogoUrl(code)}
+                  alt={b.name}
+                  className="w-12 h-12 object-contain"
+                  style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.12))' }}
+                />
+              ) : (
+                <span
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black tracking-tight shadow-sm"
+                  style={{ backgroundColor: b.color, fontSize: fs }}
+                >
+                  {wm}
+                </span>
+              )}
               <span className="text-[10.5px] font-bold text-gray-800 leading-tight">{b.name}</span>
             </div>
             );
