@@ -4,7 +4,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = Number(process.argv[2] || 8080);
+const PORT = Number(process.env.PORT || process.argv[2] || 8080);
 const ROOT = path.join(__dirname, 'dist', 'public');
 const UPSTREAM = { host: '127.0.0.1', port: 5200 };
 
@@ -35,6 +35,12 @@ function proxyApi(req, res) {
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   let p = decodeURIComponent(url.pathname);
+
+  // Health check (Render)
+  if (p === '/api/health') {
+    res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify({ ok: true, service: 'aba001', ts: Date.now() }));
+  }
 
   // API 代理
   if (p === '/api' || p.startsWith('/api/')) return proxyApi(req, res);
