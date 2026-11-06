@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import {
   ArrowRight, Bell, ChartNoAxesColumnIncreasing, CreditCard, Eye, EyeOff, Gift,
-  Heart, MessageCircle, MoreHorizontal, QrCode, Receipt, Repeat2, Send,
+  MessageCircle, MoreHorizontal, QrCode, Receipt, Repeat2, Send,
   Settings, ShoppingBag, Smartphone, Wallet,
 } from 'lucide-react';
 import { defaultAccount } from '@/data/accounts';
@@ -49,14 +49,6 @@ const tools = [
   { title: 'គ្រប់គ្រងកាត', subtitle: 'Manage your cards', color: 'tool-navy', route: '/cards', icon: CreditCard },
   { title: 'សង្ខេបចំណាយ', subtitle: 'Spending summary', color: 'tool-plum', route: '/accounts', icon: ChartNoAxesColumnIncreasing },
   { title: 'រង្វាន់ និងអត្ថប្រយោជន៍', subtitle: 'Rewards & benefits', color: 'tool-coral', route: '/settings/features', icon: Gift },
-];
-
-const tabs = [
-  { label: 'ទំព័រដើម', route: '/', icon: MoreHorizontal, home: true },
-  { label: 'ផ្ទេរប្រាក់', route: '/transfer', icon: Repeat2, home: false },
-  { label: 'ការទូទាត់', route: '/payments', icon: Receipt, home: false },
-  { label: 'ចូលចិត្ត', route: '/accounts', icon: Heart, home: false },
-  { label: 'ផ្សេងៗ', route: '/settings', icon: MoreHorizontal, home: false },
 ];
 
 export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
@@ -391,20 +383,6 @@ export default function HomeRedesign({ onSwitch }: { onSwitch: () => void }) {
         </section>
       </div>
 
-      {/* Bottom navigation */}
-      <nav className="relative z-10 flex shrink-0 justify-around border-t border-[#5e4f3c]/10 bg-[#f6f1e1]/95 px-2 pb-[max(9px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-lg" aria-label="Main navigation">
-        {tabs.map(({ label, route, icon: Icon, home }) => (
-          <button
-            type="button"
-            key={label}
-            onClick={() => setLocation(route)}
-            className={`flex min-w-[58px] flex-col items-center gap-[3px] text-[9px] ${home ? 'font-bold text-[#477865]' : 'text-[#9a8e7c]'}`}
-          >
-            <Icon size={19} />
-            <span>{label}</span>
-          </button>
-        ))}
-      </nav>
 
       {themeOpen && (
         <ThemeModal

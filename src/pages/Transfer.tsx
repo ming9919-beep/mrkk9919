@@ -34,6 +34,9 @@ const USE_REAL_PAYMENT = false;
    number, we resolve the recipient name (and currency) shown under the input.
    This mirrors the official form, where typing 017 429 221 reveals
    "PA SOKVEN | USD" below the account field. ───────────────────────────────── */
+/** Recipient pre-filled when the internal (ABA → ABA) form opens. */
+const INTERNAL_DEFAULT_ACCOUNT = '015 277 736';
+
 const ABA_ACCOUNTS: Record<string, { name: string; currency: 'USD' | 'KHR' }> = {
   '017429221':  { name: 'PA SOKVEN', currency: 'USD' },
   '0168886168': { name: 'SOEU YUKHEANG', currency: 'USD' },
@@ -41,6 +44,7 @@ const ABA_ACCOUNTS: Record<string, { name: string; currency: 'USD' | 'KHR' }> = 
   '088710222':  { name: 'YUKHEANG SOEU', currency: 'USD' },
   '600980842':  { name: 'qiang', currency: 'KHR' },
   '150614168':  { name: 'qiang', currency: 'USD' },
+  '015277736':  { name: 'ROEURN MON', currency: 'USD' },
 };
 
 /* ─── Number pad ─────────────────────────────────────────────────────────────── */
@@ -672,7 +676,13 @@ export default function Transfer() {
       setData(d);
       rawRef.current = DEMO_KHQR[0].qr;
       setPayeeCur(d.currency ?? 'USD');
-      if (tfMode !== 'internal') setToAccount(d.accountNumber || d.bakongId.split('@')[0] || '');
+      if (tfMode !== 'internal') {
+        setToAccount(d.accountNumber || d.bakongId.split('@')[0] || '');
+      } else {
+        // Internal ABA transfer opens with the registered recipient pre-filled.
+        setToAccount(INTERNAL_DEFAULT_ACCOUNT);
+        setPayeeCur('USD');
+      }
     }
   }, [setLocation]);
 
