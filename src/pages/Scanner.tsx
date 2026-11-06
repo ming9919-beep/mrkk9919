@@ -380,31 +380,25 @@ export default function Scanner() {
   const handleQRString = useCallback((raw: string) => {
     if (scannedRef.current) return;
     const res = parseKHQRDetail(raw);
-    if (res.ok) {
+    const len = res.ok ? null : parseKHQRLenient(raw);
+    const data = res.ok ? res.data : len?.data ?? null;
+
+    if (data) {
+      // Straight to the pay page — the recipient readout lives there, so the
+      // extra confirmation sheet in between is skipped (one step, like the app).
       scannedRef.current = true;
       stopLoop();
       setPulse(true);
       setTimeout(() => setPulse(false), 500);
       setLastRaw(raw);
-      setResult({ data: res.data, verified: true });
+      setPendingTransfer(data, raw);
+      setLocation('/pay');
       return;
     }
-    // Strict verification failed → still try to read what is in the QR,
-    // flagged as unverified so it can never authorise a payment.
-    const len = parseKHQRLenient(raw);
-    const lenData = len.data;
-    if (lenData) {
-      scannedRef.current = true;
-      stopLoop();
-      setPulse(true);
-      setTimeout(() => setPulse(false), 500);
-      setLastRaw(raw);
-      setResult({ data: lenData, verified: false, reason: res.reason });
-      return;
-    }
-    if (res.reason === 'crc')        showToast('error', 'QR is corrupted (CRC check failed)');
-    else if (res.reason === 'not-bakong') showToast('error', 'Not a Bakong / KHQR code');
-    else                              showToast('error', 'Unreadable QR code');
+    const reason = res.ok ? null : res.reason;
+    if (reason === 'crc')          showToast('error', 'QR is corrupted (CRC check failed)');
+    else if (reason === 'not-bakong') showToast('error', 'Not a Bakong / KHQR code');
+    else                            showToast('error', 'Unreadable QR code');
   }, []);
 
   /* ── Decode loop ──
