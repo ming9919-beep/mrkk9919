@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "build:ios": "PORT=5173 BASE_PATH=./ vite build --config vite.config.ts && cap sync ios",
+    "build:ios": "PORT=5173 BASE_PATH=/ vite build --config vite.config.ts && cap sync ios",
     "ios:open": "cap open ios",
     "ios:sync": "cap sync ios"
   },

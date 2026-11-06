@@ -1,0 +1,36 @@
+name: Build unsigned IPA
+
+# Produces an UNSIGNED .ipa artifact (needs re-signing to install).
+# macOS runner only; the repo's normal Pages workflow is separate.
+on:
+  workflow_dispatch:
+
+jobs:
+  ipa:
+    runs-on: macos-14
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:ios
+      - name: xcodebuild (no signing)
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App \
+            -configuration Release -sdk iphoneos \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO
+      - name: Package Payload
+        run: |
+          mkdir -p build/Payload
+          cp -R build/Build/Products/Release-iphoneos/App.app build/Payload/
+          cd build && zip -rq ABA-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ABA-unsigned-ipa
+          path: build/ABA-unsigned.ipa

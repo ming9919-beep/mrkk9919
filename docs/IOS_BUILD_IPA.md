@@ -16,8 +16,9 @@ pnpm install
 pnpm build:ios          # = BASE_PATH=./ vite build + cap sync ios
 ```
 
-> `BASE_PATH=./` 很关键：Capacitor 用 WKWebView 从 App 包内读文件，
-> 绝对路径 `/assets/...` 会 404。网页版仍用 `/ABA001/` 构建，二者互不影响。
+> `BASE_PATH=/` 很关键：Capacitor 的 WKWebView 把 App 包挂在 `capacitor://localhost/` 根目录，
+> 用根绝对路径 `/assets/...` 最稳（app 内部用 pushState 跳路由后，相对路径会错位到 `/pay/images/...`）。
+> 网页版仍用 `/ABA001/` 构建，二者互不影响。
 
 ## 2. 打开工程、跑真机
 ```bash
