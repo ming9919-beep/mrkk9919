@@ -1,32 +1,27 @@
-# Render.com blueprint — static site for the ABA001 demo.
+# Render.com blueprint — Node web service for the ABA001 demo.
 #
-# Deploy: Render dashboard → New → Blueprint → pick mrkk9919/ABA001 → Apply.
-# It builds with BASE_PATH=/ (root hosting, unlike the /ABA001/ GitHub Pages
-# build) and serves the SPA from dist/public with a catch-all rewrite so deep
-# routes like /accounts or /transfer/send work.
+# This file documents the service that is already running at
+# https://aba001.onrender.com (created via the Render API). Opening
+# New → Blueprint on this repo would create an equivalent service.
+#
+# Why a Node service rather than a static site: GitHub Pages is a plain static
+# host, but on Render we get a real process — the tiny http server in
+# start-prod.cjs gives SPA fallback (/accounts, /transfer/send …) plus a
+# /api/health endpoint. Build uses BASE_PATH=/ (root domain), unlike the
+# /ABA001/ build used for GitHub Pages.
 services:
   - type: web
     name: aba001
-    runtime: static
+    runtime: node
+    plan: free
+    region: singapore
     buildCommand: corepack enable && pnpm install --no-frozen-lockfile && PORT=5173 BASE_PATH=/ pnpm build
-    staticPublishPath: ./dist/public
+    startCommand: node start-prod.cjs
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: 22.23.2
-      - key: PORT
-        value: "5173"
       - key: BASE_PATH
         value: /
-    routes:
-      # SPA fallback: every non-file path returns index.html
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    headers:
-      # Vite emits hashed filenames — safe to cache forever
-      - path: /assets/*
-        name: Cache-Control
-        value: public, max-age=31536000, immutable
-      - path: /icons/*
-        name: Cache-Control
-        value: public, max-age=604800
+      - key: NODE_ENV
+        value: production
